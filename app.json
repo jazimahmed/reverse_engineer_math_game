@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Math Games Research Build",
+    "slug": "math-games-research-build",
+    "version": "0.1.0",
+    "android": {
+      "package": "org.independent.mathgames.research"
+    }
+  }
+}

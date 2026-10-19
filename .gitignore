@@ -1,0 +1,12 @@
+# Regenerable runtime / tool artifacts (not project work)
+.android-user/
+.npm-cache/
+avd-data/
+node_modules/
+.expo/
+*.lock
+package-lock.json
+
+# Scratch
+emulator.err.log
+emulator.out.log
