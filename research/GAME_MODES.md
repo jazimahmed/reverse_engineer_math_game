@@ -4,7 +4,7 @@ The following are component families in the supplied APK's DEX/layout resources.
 
 | Candidate family | Static evidence | Confidence / runtime status |
 |---|---|---|
-| Addition | `addition.AdditionActivity`, `AdditionGame1Activity`–`AdditionGame9Activity`, memory-match activity and `activity_addition*` layouts | CONFIRMED components; flows UNKNOWN |
+| Addition | `addition.AdditionActivity`, `AdditionGame1Activity`-`AdditionGame9Activity`, memory-match activity and `activity_addition*` layouts | CONFIRMED components; **flows partially observed at runtime** (E-RT-004/005) |
 | Subtraction | `SubtractionActivity`, `SubtractionGame1Activity`–`SubtractionGame9Activity`, memory-match activity and `activity_subtraction*` layouts | CONFIRMED components; flows UNKNOWN |
 | Multiplication | `MultiplicationActivity`, `MultiplicationGame1Activity`–`MultiplicationGame9Activity`, memory-match activity and `activity_multiplication*` layouts | CONFIRMED components; flows UNKNOWN |
 | Division | `DivisionActivity`, `DivisionGame1Activity`–`DivisionGame9Activity`, level/new-game/memory-match activities and layouts | CONFIRMED components; rules UNKNOWN |
@@ -15,6 +15,20 @@ The following are component families in the supplied APK's DEX/layout resources.
 | Duel, multiplayer, leaderboard | Four `DuelChallenge*Activity` classes plus multiplayer and leaderboard activities | CONFIRMED components; network and player flows UNKNOWN |
 
 No mode has been behaviorally verified. The current Play listing for this package is not sufficient to establish behavior for this supplied v14.2 artifact.
+
+## Runtime-observed modes (2026-10-19 emulator run)
+
+| Mode | How it is reached | Observed behavior | Confidence |
+|---|---|---|---|
+| **Topic mode-select** | Main menu → topic tile | 8 mode tiles: Practice, Quiz, Duel, Play, Test, Time, Learn, Hard. Observed for Addition only. | CONFIRMED (E-RT-004) |
+| **Practice** | Mode-select → Practice | 10-question round, 4 options in a 2x2 grid, first-try-correct green counter, red counter for questions needing a retry, green flash on correct, orange background on the 10/10 question, result screen with Score/Correct/Wrong plus a per-question review sheet. | CONFIRMED (E-RT-005 … E-RT-010) |
+| **Quiz / Duel / Play / Test / Time / Learn / Hard** | Mode-select → tile | Not yet entered. | UNKNOWN |
+| **Equations (Math Pieces variant)** | Main menu → gamepad → Games hub → Equations → level 1 | 4-column level list (level 1 unlocked, rest padlocked) → 5x5 crossword board `58 + 87 = ?` / `18 - 8 = ?` with a digit tray, a countdown stopwatch and a tutorial overlay whose ▶ ends the level. | CONFIRMED (E-RT-012 … E-RT-015) |
+| **2048 / Fifteen / Puzzle / Match / Sudoku / Mix / Memory** | Games hub → tile | Tiles confirmed present; not entered. | UNKNOWN (E-RT-003) |
+| **Leaderboards** | Games hub → crown | Opens Google Sign-In; the leaderboard screen itself is unobserved. | UNKNOWN (E-RT-003) |
+| **Random Number** | unknown entry | Not reachable from any observed screen. | UNKNOWN |
+
+The mode list is therefore CONFIRMED to contain 8 topic modes per topic, but only **Practice** and **Equations** have been played. Every other mode remains UNKNOWN.
 
 ### Math Pieces static refinement
 

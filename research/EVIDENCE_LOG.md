@@ -277,3 +277,102 @@ A user-provided APK or an authorized, working reference device/emulator session 
 - Result: strict TypeScript check passed; Node suite grew from 23 to 26 passing tests: one-pass completion parity, partial-pass non-completion, empty-pass skip, and `equtaionTags`-style per-key wrong-attempt de-duplication.
 - Limitation: helper semantics require callers to rebuild the equation array with `isCorrect=false` each pass (mirroring the APK's per-pass object reconstruction). No UI, gesture, timer, or persistence integration exists.
 
+## E-RT-001 — First successful APK execution on an emulator
+- Confidence: CONFIRMED.
+- Date: 2026-10-19 (OpenCode session; first-ever execution of the target APK — every earlier entry in this log was static analysis).
+- Setup: Google Pixel 6 AVD (`sdk_gphone16k_x86_64`), Android 17, 1080x2400, headless (`-no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot`); APK installed via `adb install -r` → `Success`; `versionName=14.2`, `versionCode=142`, `minSdk=19`, `targetSdk=32`; launcher `.SplashScreenActivity`.
+- Result: the Codex-era ADB blocker is resolved. Root cause of `Cannot mkdir '\.android': Permission denied` was simply that `C:\Users\Administrator\.android` did not exist and the previous sandbox could not create it; creating it manually let the ADB daemon start. The npm blocker was also a transient `read ECONNRESET` during package unpacking, not an access block (see E-ENV-007).
+- Artifacts: `research/observations/runtime/`, `research/observations/RUNTIME_FIRST_PASS.md`.
+- Limit: the emulator's own SystemUI raised ANR dialogs twice (emulator/swiftshader artifact, no app crash in logcat); the emulator process died once mid-session and was rebooted.
+
+## E-RT-002 — Main menu layout (`.MainActivity`)
+- Confidence: CONFIRMED for the observed layout; UNKNOWN for tap-sound and profile behaviour.
+- Evidence: `runtime/boot-03-main-menu-clean.png`, `boot-05-main-settled.png`, `main-night-mode.png`.
+- Result: 4 top-bar tiles (avatar/profile, settings gear, language "文/A", reset pink circular arrow) and 8 topic tiles (2x4) on a light-blue checkered background: Add (+, green), Subtract (−, light blue), Multiply (×, orange), Division (✓-drawn glyph, pink), Square root (√, purple), Decimals (0.1, teal), Fractions (2/3, blue), gamepad (dark green). Tiles animate in after an initially empty grid. The gamepad tile opens the Games hub, not an arithmetic topic.
+
+## E-RT-003 — Games hub (`.game.GameActivity`) and account gate
+- Confidence: CONFIRMED for the tile list and the sign-in trigger; UNKNOWN for each sub-game.
+- Evidence: `runtime/mixed-01-entry.png`, `runtime/ui/games-hub.xml`.
+- Result: hub lists 2048, Fifteen, Puzzle, Match, Sudoku, Mix, Memory, Equations (2 columns, scrollable). Header has a crown (leaderboards). Opening the hub raised `com.google.android.gms/.auth.api.signin.ui.SignInActivity` — an account gate for the online/ranking feature. Exact trigger element INFERRED (crown).
+
+## E-RT-004 — Topic mode-select (`.addition.AdditionActivity`)
+- Confidence: CONFIRMED for Addition; INFERRED (same 8 modes) for the other topics.
+- Evidence: `runtime/add-01-mode-select.png`.
+- Result: 8 user-facing mode labels — Practice, Quiz, Duel, Play, Test, Time, Learn, Hard — with a topic title header, a play triangle and a gear-with-"1" button. The list scrolls (Learn/Hard sit at the viewport bottom).
+
+## E-RT-005 — Practice round structure (`.addition.AdditionGame1Activity`)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/add-02-practice.png`, `runtime/ui/` dumps of the practice screen.
+- Result: 10-question round ("N/10"), 4 options in a 2x2 grid (`opt1`–`opt4`), question parts `n1` `sgn` `n2` `eql` `ans`, counter chips `right1` (green) / `wrong1` (red), settings gear (pink) and a red pencil/edit button. Addition Game 1 operands observed within 0..10; the correct sum is always among the four options.
+
+## E-RT-006 — Practice scoring semantics (first-try correct vs retry)
+- Confidence: CONFIRMED by controlled taps (screenshots + counter values).
+- Evidence: `runtime/add-03-answer-tap-feedback.png`, `add-05-wrong-feedback.png`, `add-06-after-wrong.png`, `add-07-after-wrong-then-correct.png`, `add-09-q4.png`.
+- Result: the green chip counts first-try-correct answers only; the red chip counts questions that required a retry. Correct first try → green +1 immediately, green background flash, next question loads. Wrong tap → the option turns red with black text, stays marked, no advance, no counter change (verified over 4 s). A subsequent correct tap advances the question and increments red (not green). Consequence: the result screen's "Correct" count equals the number of questions solved without a retry.
+
+## E-RT-007 — Practice screen state colours
+- Confidence: CONFIRMED.
+- Evidence: `runtime/add-02`, `add-03`, `add-10-round-end.png`.
+- Result: light blue = idle question, green = correct-answer flash, orange = the final (10/10) question. The progress label shows the index of the question currently displayed, so "10/10" still requires an answer.
+
+## E-RT-008 — Result screen (`.ResultActivity`)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/add-12-result-2.png`, `runtime/ui/result-activity.xml`.
+- Result: title "Score" (`text`), "Correct" (`crct`) = N (`rt`), "Wrong" (`wrng`) = N (`wr`), RESTART (`restart`) / EXIT (`exit`) buttons, a green checklist icon, and a 3-icon bottom bar (thumbs-up, refresh, pink). A 10/10 first-try round displayed Correct = 10, Wrong = 0.
+
+## E-RT-009 — Result answer-review sheet
+- Confidence: CONFIRMED.
+- Evidence: `runtime/add-13-review-sheet.png`, `add-14-review-scrolled.png`.
+- Result: the green checklist icon opens a white, green-bordered scrollable dialog listing every question of the round in order with a green checkmark ("7 + 10 = 17" … "2 + 8 = 10"), closed with a red X. Rendering of wrong answers in this sheet is UNKNOWN (the captured round had no wrong answers).
+
+## E-RT-010 — Result navigation
+- Confidence: CONFIRMED.
+- Evidence: `runtime/add-15-after-exit.png`; `dumpsys activity activities` transitions.
+- Result: EXIT returns to the topic mode-select (`.addition.AdditionActivity`), not to the main menu. RESTART behaviour UNKNOWN (not exercised).
+
+## E-RT-011 — Settings (`SettingsActivity`) and persistence
+- Confidence: CONFIRMED.
+- Evidence: `runtime/settings-01.png`, `settings-02-night-on.png`, `main-night-after-restart2.png`.
+- Result: purple dialog "Settings" with Music (ON), Sound (ON), Night (OFF) toggles plus the shared 3-icon bottom bar. Toggling Night switches the whole app to a dark theme (near-black background, grey-bordered tiles, white glyphs) and the setting **survives force-stop + relaunch** → settings are persisted on device. Splash remains light-themed.
+
+## E-RT-012 — Equations level list (`.game.Game_equation_levels_Activity`)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/equations-02-levels.png`, `runtime/ui/equations-level-list.xml`.
+- Result: 4-column grid of numbered level tiles; only level 1 unlocked, all others carry a padlock icon; long scrollable list (40+ levels observed, packaged asset has 150). Tapping level 1 opens `.game.GameEquationsEasy`.
+
+## E-RT-013 — Equations board layout and piece tray
+- Confidence: CONFIRMED for the observed rendering; INFERRED for the full grid geometry.
+- Evidence: `runtime/equations-10-after-play-0.7s.png`, `equations-11-after-play-2.2s.png`, `runtime/ui/equations-board-*.xml`.
+- Result: 5-column crossword-style board; row 1 renders `58 + 87 = [?]`, row 2 `18 - 8 = [?]`, further bands render operator-only rows (`+ -`, `= =`) and empty `?` placeholders — rows and columns are both 5-cell equations whose answer cells are shared `?` tiles. Bottom tray: `1 2 3 4 5 ⌫` / `6 7 8 9 0` plus an "AD" lightbulb hint tile. Header: back arrow, an empty wide panel, and a stopwatch counter.
+
+## E-RT-014 — Equations timer
+- Confidence: CONFIRMED (direction), INFERRED (duration semantics).
+- Evidence: `runtime/equations-07-overlay.png` (0), `equations-10` (43), `equations-11` (40).
+- Result: the stopwatch counter counts **down**; it reads 0 while the help overlay is up and starts at a non-zero value once the overlay is dismissed.
+
+## E-RT-015 — Equations help overlay ends the level
+- Confidence: CONFIRMED at runtime; this resolves the standing static contradiction.
+- Evidence: `runtime/equations-03-level1.png`, `equations-04-board.png`, `equations-07-overlay.png`, `equations-08-anim-*.png`, `equations-10/11`, logcat (`GameEquationsEasy` TO_BACK, no crash), `dumpsys activity activities`.
+- Result: entering a level shows a static red-circle / red-X / white-▶ help illustration that blocks input and freezes the timer at 0. Tapping ▶ dismisses it and reveals a playable board with a running countdown; within a few seconds the activity finishes itself and the app returns to the level list (no FATAL exception, no ANR, no app kill in logcat). This matches the DEX path where the tutorial's step value does not match the target and `completeEqTwo(value)` calls `gameOver()` on mismatch — previously recorded as an unresolved contradiction, now observed directly.
+
+## E-RT-016 — Static dataset vs. live Equations board mismatch
+- Confidence: CONFIRMED (data comparison).
+- Evidence: `src/domain/data/mathPiecesLevels.json` (field `timerGameLevels`, level 1 = 56 cells → 7x8 per E-APK-018) vs. the live board (5x5, E-RT-013).
+- Result: the extracted 150-level dataset does not describe the Equations-Easy board. It belongs to a different variant of the same game family, and the earlier DEX class `Game_MathPieces_Activity` is not the class that runs in the Easy variant (`GameEquationsEasy`). Which entry point consumes `timerGameLevels` remains UNKNOWN.
+
+## E-RT-017 — Splash screen content
+- Confidence: CONFIRMED.
+- Evidence: `runtime/main-night-after-restart.png`.
+- Result: white splash with the GA STUDIOS logo bottom-left, "v14.2" bottom-right and a green progress dot at centre; lasts ~10-15 s on a cold emulator start.
+
+## E-RT-018 — Round duration and question generation sample
+- Confidence: CONFIRMED for the listed samples; UNKNOWN for the generator rule.
+- Evidence: `runtime/add-03` … `add-10` and the scripted round.
+- Result: 14 observed Addition Game 1 questions (10+4, 3+9, 5+2, 4+8, 7+10, 2+9, 1+9, 10+3, 4+6, 5+8, 9+5, 7+10, 9+1, 2+8) with 4 options each; operands 0..10; a repeated question ("7 + 10") occurred within one round; distractor values recur across questions (e.g. 12, 18, 7).
+
+## E-ENV-007 — Dependency restore completed
+- Confidence: CONFIRMED.
+- Date: 2026-10-19.
+- Result: `npm install` with hardened fetch settings completed after the first attempt died on `read ECONNRESET` during unpacking (registry reachable, HTTP 200 on `/expo`; no proxy configured). 299 top-level packages installed and `package-lock.json` written; `tsc --noEmit` over the whole project exits 0 with the project's own TypeScript; `npm test` passes 26/26.
+- Limit: `npm audit` reports vulnerabilities in the Expo dependency tree; not yet triaged (dependency-version decisions belong to M4).
+

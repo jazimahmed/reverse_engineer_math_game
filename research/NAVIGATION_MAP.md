@@ -1,6 +1,6 @@
 # Navigation map
 
-No navigation has been observed at runtime. These edges are reconstructed from MainActivity DEX control flow plus resource-ID names. They confirm packaged code wiring only, not runtime visibility or successful transitions.
+Navigation **has** now been observed at runtime (2026-10-19). The "Runtime-observed edges" table below is live observation; the older static table is retained as supporting code evidence.
 
 | From | Control ID / static action | To / result | Confidence | Evidence |
 |---|---|---|---|---|
@@ -29,5 +29,32 @@ No navigation has been observed at runtime. These edges are reconstructed from M
 | Result_Game2Activity (RANDOM_NUMBER) | `restartGame()` starts | RandomGameActivity at current position | CONFIRMED (static) | DEX-RN-010 |
 | Result_Game2Activity | System back handler starts | GameActivity | CONFIRMED (static) | DEX-RN-010 |
 | Any other listed destination | Back/action/completion | Unknown | UNKNOWN | No runtime observation |
+
+## Runtime-observed edges (2026-10-19)
+
+| From | Control | To / result | Confidence | Evidence |
+|---|---|---|---|---|
+| `.SplashScreenActivity` | Lottie animation end (500 ms handler delay in DEX) | `.MainActivity` | CONFIRMED (runtime) | E-RT-001, E-RT-017 |
+| `.MainActivity` | Add tile | `.addition.AdditionActivity` | CONFIRMED (runtime) | E-RT-004 |
+| `.MainActivity` | gamepad tile (8th) | `.game.GameActivity` | CONFIRMED (runtime) | E-RT-003 |
+| `.MainActivity` | settings gear | `.SettingsActivity` | CONFIRMED (runtime) | E-RT-011 |
+| `.MainActivity` | profile avatar / language "文/A" / reset pink arrow | not exercised | UNKNOWN | — |
+| `.game.GameActivity` | Equations tile | `.game.Game_equation_levels_Activity` | CONFIRMED (runtime) | E-RT-012 |
+| `.game.GameActivity` | hub entry | `com.google.android.gms/.auth.api.signin.ui.SignInActivity` (account gate) | CONFIRMED (runtime) | E-RT-003 |
+| `.game.Game_equation_levels_Activity` | level tile 1 | `.game.GameEquationsEasy` | CONFIRMED (runtime) | E-RT-012 |
+| `.game.GameEquationsEasy` | ▶ on the help overlay | board becomes playable, countdown runs | CONFIRMED (runtime) | E-RT-015 |
+| `.game.GameEquationsEasy` | (no input) | activity finishes itself → back to `.game.Game_equation_levels_Activity` | CONFIRMED (runtime) | E-RT-015 |
+| `.addition.AdditionActivity` | Practice tile | `.addition.AdditionGame1Activity` | CONFIRMED (runtime) | E-RT-005 |
+| `.addition.AdditionGame1Activity` | 10th answer | `.ResultActivity` | CONFIRMED (runtime) | E-RT-008 |
+| `.ResultActivity` | EXIT | `.addition.AdditionActivity` | CONFIRMED (runtime) | E-RT-010 |
+| `.ResultActivity` | RESTART | not exercised | UNKNOWN | — |
+| `.ResultActivity` | green checklist icon | review dialog (in-screen) | CONFIRMED (runtime) | E-RT-009 |
+| `.ResultActivity` | back arrow | `.addition.AdditionActivity` (observed in the round-end capture) | CONFIRMED (runtime) | E-RT-010 |
+| `.addition.AdditionGame1Activity` | back arrow | `.addition.AdditionActivity` | CONFIRMED (runtime) | E-RT-005 |
+| Any screen | Android back | previous screen in the stack (standard) | INFERRED | observed stack returns |
+
+### Runtime correction to the static chain
+
+The static chain "MainActivity `games` -> GameActivity -> GameLevelsActivity -> RandomGameActivity -> Result_Game2Activity" was **not** confirmed at runtime. The observed hub opens **Equation levels** (not the random-number level list) from the Equations tile; the random-number mode's entry point remains UNKNOWN.
 
 The static route chain includes MainActivity `games` -> GameActivity -> a GameActivity click-switch case -> GameLevelsActivity -> selected level -> RandomGameActivity -> Result_Game2Activity on the `gameOver()` path. Result actions can restart/advance to RandomGameActivity; system back starts GameActivity. RandomGameActivity's own back control returns to GameLevelsActivity. The GameActivity switch case's user-visible label and runtime reachability are still UNKNOWN.

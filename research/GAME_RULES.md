@@ -1,6 +1,28 @@
 # Game rules
 
-No rules have been verified at runtime. Static data in the exact supplied APK establishes only the following candidate puzzle input structures:
+Rules for **Addition → Practice** and the **Equations** board are now verified at runtime (2026-10-19). Everything else below is still static-analysis evidence.
+
+## Runtime-verified rules — Addition Practice (E-RT-005 … E-RT-007)
+
+- A round contains exactly **10 questions**; the header label "N/10" is the index of the question currently displayed, so "10/10" is still unanswered.
+- Each question shows two operands, a sign, an equals sign and an empty answer field, plus **four answer options** in a 2x2 grid; the correct value is always among the four.
+- Addition Game 1 operands observed in **0..10** (samples: 10+4, 3+9, 5+2, 4+8, 7+10, 2+9, 1+9, 10+3, 4+6, 5+8, 9+5, 7+10, 9+1, 2+8). The generator rule beyond that range is UNKNOWN.
+- Questions may repeat inside one round ("7 + 10" appeared twice), and distractor values recur across questions.
+- Answer validation: a correct option advances to the next question immediately; an incorrect option turns red and does **not** advance, so the same question must be answered again.
+- Background colours encode state: light blue = idle, green = correct-answer flash, orange = final question.
+
+## Runtime-verified rules — Equations (Math Pieces variant) (E-RT-013 … E-RT-016)
+
+- The board is a **5x5 crossword-style grid** in which every row and every column is a five-cell equation; the `?` tiles are the shared answer cells.
+- Sample level 1 rendering: row 1 `58 + 87 = ?`, row 2 `18 - 8 = ?`; intermediate bands show operator-only rows (`+ -`, `= =`).
+- A draggable piece tray provides the digits `1..9`, `0`, a backspace (`⌫`) and an "AD" hint tile.
+- The header stopwatch counts **down**; it is frozen at 0 while the tutorial overlay is displayed and starts at a non-zero value afterwards.
+- The tutorial overlay (red circle / red X / white ▶) blocks input; pressing ▶ dismisses it and reveals a playable board, **but the level then ends by itself within seconds** and the app returns to the level list. This matches the static `completeEqTwo(value)` → `gameOver()` mismatch branch.
+- **Correction:** the packaged `mathpiecesData.json` / `timerGameLevels` dataset (150 records, 56/72/90 cells → 7x8, 8x9, 9x10 grids) does **not** describe this board. It belongs to a different variant of the same game family; the class that runs here is `GameEquationsEasy`, not the statically analysed `Game_MathPieces_Activity`. Which entry point consumes `timerGameLevels` is UNKNOWN.
+
+## Static-evidence rules (not runtime verified)
+
+Static data in the exact supplied APK establishes only the following candidate puzzle input structures:
 
 ## Random-number levels
 

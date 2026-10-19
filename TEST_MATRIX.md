@@ -27,3 +27,24 @@ The matrix distinguishes static artifact evidence, implementation checks, and ac
 | PUZZLE-MATHPIECES | 150 `timerGameLevels`; timer-related activity methods | None | E-APK-002, E-APK-004 | Static only | Objective/timer/scoring unknown | N/A | Pending observation |
 | NAVIGATION | Candidate Activities/resources present | None | E-APK-002 | Not run | Routes/reachability unknown | N/A | Pending observation |
 | DEVICE-ADB | Pixel 6 AVD files present; emulator boot was observed | N/A | E-ENV-003/004 | ADB invocation failed before device enumeration | APK install/launch/capture unavailable | N/A | Environment blocker |
+
+## Runtime-observed rows (2026-10-19 emulator run of the exact APK)
+
+The APK is now installed and running; the rows above that say "Not run" describe the pre-runtime state. These rows record what was actually observed against the reference.
+
+| Feature ID | Reference behavior (observed) | Implemented behavior | Evidence | Test result | Difference | Severity | Resolution |
+|---|---|---|---|---|---|---|---|
+| RT-BOOT | Splash shows GA STUDIOS logo, "v14.2", green progress dot, then hands off to MainActivity after 10-15 s | None | E-RT-001, E-RT-017 | Observed on device; screenshots captured | No implementation yet | High | Pending M4 |
+| RT-MAINMENU | 4 utility tiles (avatar, gear, 文/A, reset) + 8 topic tiles in 2x4; gamepad tile opens the Games hub | None | E-RT-002 | Observed on device; UI dump captured | No implementation yet | High | Pending M4 |
+| RT-MODESEL | Topic screen shows 8 mode tiles: Practice, Quiz, Duel, Play, Test, Time, Learn, Hard | None | E-RT-004 | Observed for Addition only | Other topics unverified | High | Pending M4 |
+| RT-PRACTICE-STRUCT | 10 questions, 4 options in a 2x2 grid, operands 0..10 for Game 1 | None | E-RT-005, E-RT-018 | Observed; 14 question samples recorded | No implementation yet | High | Pending M4 |
+| RT-PRACTICE-SCORE | Green counter = first-try correct; red counter = questions needing a retry; wrong tap marks the option red, does not advance, does not change counters | None | E-RT-006 | Observed with controlled taps (single-wrong-tap case) | Multi-wrong-tap counting unknown | High | Pending M4 |
+| RT-PRACTICE-FEEDBACK | Idle background light blue, correct flash green, last question orange | None | E-RT-007 | Observed | No implementation yet | Medium | Pending M4 |
+| RT-RESULT | "Score" title, Correct/Wrong counts, RESTART/EXIT, green checklist icon, 3-icon bottom bar; EXIT returns to the topic screen | None | E-RT-008, E-RT-010 | Observed (10/10 round: Correct 10, Wrong 0) | RESTART and bottom-bar icons unobserved | High | Pending M4 |
+| RT-REVIEW-SHEET | Checklist icon opens a scrollable per-question list with green checks | None | E-RT-009 | Observed; scrolled | Wrong-answer rendering unobserved | Medium | Pending M4 |
+| RT-SETTINGS | Purple dialog with Music/Sound/Night; Night = global dark theme and persists across force-stop + relaunch | None | E-RT-011 | Observed and persistence verified | Music/Sound effects unobserved | High | Pending M4 |
+| RT-GAMES-HUB | 8 mini-game tiles (2048, Fifteen, Puzzle, Match, Sudoku, Mix, Memory, Equations); crown raises Google Sign-In | None | E-RT-003 | Observed | 7 games unentered | Medium | Pending M4 |
+| RT-EQ-LEVELS | Equations level list: 4 columns, level 1 unlocked, others padlocked, long scroll | None | E-RT-012 | Observed | Unlock rules unknown | Medium | Pending M4 |
+| RT-EQ-BOARD | 5x5 crossword board (`58 + 87 = ?`, `18 - 8 = ?`), digit tray with 1-9/0/backspace/AD hint, countdown stopwatch | None | E-RT-013, E-RT-014 | Observed | Drag interaction not performed | High | Pending M4 |
+| RT-EQ-TUTORIAL | ▶ on the help overlay reveals a playable board, then the level ends by itself and the app returns to the level list | None | E-RT-015 | Observed 3x (no crash, no ANR) | Matches the static `completeEqTwo` → `gameOver()` mismatch path | High | Documented; parity requires reproducing the self-end |
+| RT-DATA-MISMATCH | Live board is 5x5; packaged `timerGameLevels` dataset is 56/72/90 cells (7x8/8x9/9x10) | Dataset parser + grid config (static mapping) | E-RT-016, E-APK-018 | Data compared | The packaged dataset belongs to a different variant | High | Dataset must not drive the Easy board |

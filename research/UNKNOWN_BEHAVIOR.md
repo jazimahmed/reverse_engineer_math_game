@@ -1,19 +1,23 @@
 # Unknown behavior
 
-The target is `research/apk/Math-Games-v14-2-[Premium]-modyolo.apk`. Static identity and structure are recorded, but this APK has not been installed or run.
+The target is `research/apk/Math-Games-v14-2-[Premium]-modyolo.apk`. **The APK is now installed and running on an emulator** (2026-10-19), so runtime observations exist; see `research/observations/RUNTIME_FIRST_PASS.md` and E-RT-001…E-RT-018 in `EVIDENCE_LOG.md`. The remaining unknowns below are what the runtime pass has *not* yet covered.
 
 Highest-priority unknowns:
 
-1. Main-screen visual order, visible/locked modes, and exact navigation.
-2. Whether activity names correspond to accessible modes; most mode rules and question generation. For Random Number, help art infers chained equations toward the target, but this conflicts with the DEX mismatch-to-gameOver branch and remains unverified at runtime.
-3. Answer formats, validation, feedback, scoring, timers, hints, difficulty, and completion.
-4. Progress unlocks, star scoring, persistence and resume after relaunch.
-5. Settings, language behavior, offline behavior, errors, and orientation/responsive layouts.
-6. Duel/multiplayer online requirements and behavior without connectivity.
-7. Which packaged assets are used by this v14.2 build versus legacy/unused resources.
-8. How much the supplied Modyolo-distributed build differs from the original developer-signed build.
+1. **The other 7 modes** of every topic (Quiz, Duel, Play, Test, Time, Learn, Hard) — only **Practice** has been played. Mode-specific rules, timers, scoring and end conditions are entirely unknown.
+2. **The other 7 topics** (Subtract, Multiply, Divide, Square root, Decimals, Fractions, Mixed/gamepad) — only Addition's mode-select has been seen; the mode list may differ per topic, and the nine numbered `*Game1..9Activity` tiers per topic are unexplored (operand ranges, difficulty progression).
+3. **The 7 other mini-games** in the hub (2048, Fifteen, Puzzle, Match, Sudoku, Mix, Memory) — tile presence is confirmed, behavior is not.
+4. **Equations board interaction** — no successful drag has been performed; answer-cell fill/backspace, row/column feedback colouring, star award, the AD hint, the countdown duration and the empty header panel are all unknown. The level also self-ends after the tutorial, so the intended play loop is still unobserved.
+5. **Result screen details** — the three bottom-bar icons (thumbs-up / refresh / pink), how wrong answers render in the review sheet, RESTART behavior, per-level persistence.
+6. **Progress unlocks, star scoring, persistence and resume** — only the Settings Night toggle has been verified to persist (force-stop + relaunch). Level unlock state, stars, score history, and the reset button are unknown.
+7. **The main-menu utility tiles** — profile avatar, language switch ("文/A"), reset progress, and the gear-with-"1" dialog on the topic screen.
+8. **Offline behavior, ads, network requirements** — the Google Sign-In gate is observed; ad placements (the "AD" hint tile, the pink tile in the bottom bar) are unobserved.
+9. **Duel/multiplayer online requirements and behavior without connectivity** — static generator only.
+10. **Random Number mode** — still not reachable from any observed screen; its objective remains INFERRED and the DEX `completeEqTwo` conflict unresolved.
+11. Which packaged assets are used by this v14.2 build versus legacy/unused resources (the `timerGameLevels` mismatch is one confirmed case).
+12. How much the supplied Modyolo-distributed build differs from the original developer-signed build.
 
-ADB currently cannot connect: Windows `adb` fails to resolve its profile path and attempts to create `\.android`; the emulator itself was started in a workspace-local AVD but no ADB server/device was established. No app runtime observation has occurred.
+**Environment note (resolved):** the earlier "ADB cannot connect" blocker is fixed — `C:\Users\Administrator\.android` had to be created manually; the daemon then worked, the Pixel 6 AVD booted headless and the APK installed (`Success`). The npm blocker was a transient `read ECONNRESET`; the retry succeeded (299 packages, lockfile, `tsc --noEmit` clean, 26/26 tests).
 
 ## Static-code coverage that does not remove runtime unknowns
 

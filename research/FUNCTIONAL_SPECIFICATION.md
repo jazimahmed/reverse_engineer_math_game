@@ -1,6 +1,35 @@
-﻿# Functional specification — evidence-gated baseline
+﻿# Functional specification - evidence-gated baseline
 
-This specification describes code-level evidence from the supplied APK v14.2. It is not a complete user-visible product specification because the APK is not currently observable at runtime and its package differs from the initially named Play app.
+This specification describes behavior of the supplied APK v14.2. It now mixes **runtime-observed** behavior (the APK is installed and running on an emulator since 2026-10-19) with static code evidence. Sections are labeled accordingly; the older static sections remain candidate-only.
+
+## Runtime-verified behavior (2026-10-19)
+
+Evidence: `research/observations/RUNTIME_FIRST_PASS.md`; E-RT-001 … E-RT-018; screenshots in `research/observations/runtime/`.
+
+### Boot and navigation
+
+Splash (GA STUDIOS logo, "v14.2", green progress dot) → MainActivity (4 utility tiles + 8 topic tiles) → topic mode-select (8 mode tiles) → mode activity → ResultActivity → back to the topic mode-select. The 8th main-menu tile (gamepad) opens the Games hub (8 mini-games) rather than an arithmetic topic; its crown opens Google Sign-In.
+
+### Addition → Practice (CONFIRMED)
+
+- Round = 10 questions, 4 options each (2x2 grid), operand range observed 0..10 for Addition Game 1.
+- A correct option advances immediately (background flashes green, green counter +1 on the first try).
+- An incorrect option turns red with black text, does not advance, and does not change the counters; the same question must be answered again.
+- Green counter = first-try correct. Red counter = questions that needed a retry (not wrong taps).
+- The 10/10 question shows an orange background.
+- After the last answer → ResultActivity: "Score", "Correct" = first-try correct count, "Wrong" = retry count, RESTART (unobserved), EXIT (→ topic mode-select), a green checklist icon that opens a scrollable per-question review sheet, and a shared 3-icon bottom bar (thumbs-up / refresh / pink).
+
+### Settings (CONFIRMED)
+
+A purple dialog with Music / Sound / Night toggles. Night = global dark theme and persists across force-stop + relaunch. Splash stays light-themed.
+
+### Equations (CONFIRMED, partial)
+
+Games hub → Equations → 4-column level list (level 1 unlocked, rest padlocked) → `GameEquationsEasy`: 5x5 crossword board where rows and columns are five-cell equations, a digit tray (1-9, 0, backspace, AD hint), a countdown stopwatch, and a tutorial overlay. Pressing ▶ on the overlay reveals a playable board but the level then ends by itself and the app returns to the level list — the runtime confirmation of the static `completeEqTwo` → `gameOver()` mismatch path.
+
+### Explicitly not specified
+
+Everything not listed above (the other 7 modes, the other 7 topics, the other 7 mini-games, Duel/multiplayer, Random Number) remains UNKNOWN and must not be implemented from class names alone.
 
 ## Candidate mode: Random Number
 

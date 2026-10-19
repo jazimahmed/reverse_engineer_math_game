@@ -6,7 +6,7 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 ## Milestones
 - [x] M0 — Inspect workspace, host tools, Android SDK, emulator images/AVDs, and REA registration.
 - [x] M1 — Obtain and statically inventory the supplied APK.
-- [ ] M2 — Run the exact APK on an authorized emulator/device; inventory screens, navigation, settings, and modes across repeated sessions.
+- [ ] M2 — Run the exact APK on an authorized emulator/device; inventory screens, navigation, settings, and modes across repeated sessions. **IN PROGRESS**: APK runs on a Pixel 6 AVD; 9 screens, 1 topic (Addition), 1 mode (Practice) and the Equations board observed so far (E-RT-001…E-RT-018).
 - [ ] M3 — Complete evidence-linked specifications and state machines; label unsupported behavior UNKNOWN.
 - [ ] M4 — Confirm Expo package compatibility; implement verified functionality only.
 - [ ] M5 — Differentially test verified scenarios against the APK and fix documented differences.
@@ -22,8 +22,8 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 - [x] Added a root Expo/TypeScript scaffold and documented an Expo SDK 58 package matrix matching its official bundled native versions (E-ENV-006).
 - [x] Inspected Math Pieces touch/drop DEX: drag starts from a tagged tile; accepted drop transfers text/tag and clears the source. Added isolated transfer helper and evidence (E-APK-019, E-IMPL-010).
 - [x] Ran `npm.cmd test`: 23 Node test cases passed; strict TypeScript compile passed for Math Pieces domain module using global `tsc.cmd`.
-- [ ] Dependency install: registry.npmjs.org became TCP/HTTP reachable from the OpenCode environment (HTTP 200 on `/expo`); the first full `npm install` ran ~40 minutes and failed with `read ECONNRESET` during package unpacking (not an access/EACCES failure). A hardened retry (`--fetch-retries=10 --fetch-timeout=900000`) is in progress. Lockfile, typecheck and Android build remain unavailable until it completes.
-- [ ] Runtime reference observation remains unavailable; ADB still fails before device enumeration (`Cannot mkdir '\.android': Permission denied`) despite workspace-local Android home variables.
+- [x] Dependency install: succeeded on a hardened retry (`--fetch-retries=10 --fetch-timeout=900000`) — 299 packages, `package-lock.json` written, `tsc --noEmit` clean, `npm test` 26/26 (E-ENV-007).
+- [x] Runtime reference observation: the APK now installs and runs on the Pixel 6 AVD; see the M2 section below (E-RT-001…E-RT-018).
 - [ ] Continue mapping other game-mode assets/classes only as static candidate evidence; no unverified mode should be implemented.
 
 ## OpenCode continuation — 2026-10-19 (Codex session migration)
@@ -34,22 +34,42 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 - [x] Refined `checkMathPiecesEquations()` with the verified semantics plus optional per-key wrong-attempt dedupe; added 3 test cases (26 total, all passing); strict standalone `tsc --strict` passes for all three domain modules (E-IMPL-011).
 - [x] Updated evidence/specification docs: EVIDENCE_LOG (E-APK-020, E-IMPL-011), DEX_BEHAVIOR_FINDINGS (DEX-MP-006), GAME_RULES, GAME_MODES, SCORING_SYSTEM, UNKNOWN_BEHAVIOR, FUNCTIONAL_SPECIFICATION, TEST_MATRIX (new MP-CHECK-PASS row).
 - [ ] Dependency restore retry and `tsc --noEmit` full app typecheck (blocked on npm install completion).
-- [ ] ADB fix attempt (planned): Windows profile-path resolution (`\.android` mkdir failure) — iterate `ANDROID_AVD_HOME`/`ANDROID_PREFS_ROOT`/`ANDROID_USER_HOME` combinations and direct `adb -a` server start.
+- [ ] ADB fix attempt (planned): Windows profile-path resolution (`\.android` mkdir failure) - iterate `ANDROID_AVD_HOME`/`ANDROID_PREFS_ROOT`/`ANDROID_USER_HOME` combinations and direct `adb -a` server start.
+
+## M2 runtime observation - 2026-10-19 (OpenCode)
+- [x] Dependency restore completed on a hardened retry: 299 packages, `package-lock.json` written, full-app `tsc --noEmit` exits 0, `npm test` 26/26 (E-ENV-007).
+- [x] ADB blocker fixed: the root cause was that `C:\Users\Administrator\.android` did not exist and could not be auto-created; creating it manually let the daemon start, the Pixel 6 AVD boot headless, and the APK install (`Success`, v14.2 / versionCode 142).
+- [x] **First runtime observation of the exact APK** (E-RT-001 … E-RT-018): splash, main menu, games hub, Addition mode-select, a full Practice round, the result screen + review sheet, settings/night theme, Equations level list, Equations-Easy board + tutorial self-end.
+- [x] Documented all of it: `research/observations/RUNTIME_FIRST_PASS.md`, 44 screenshots + 7 UI hierarchies under `research/observations/runtime/`, and updates to SCREEN_SPECIFICATIONS, NAVIGATION_MAP, GAME_MODES, GAME_RULES, SCORING_SYSTEM, DIFFICULTY_SYSTEM, FUNCTIONAL_SPECIFICATION, UNKNOWN_BEHAVIOR, TEST_MATRIX, EVIDENCE_LOG.
+- [ ] M2 remainder: play the 7 unobserved modes (Quiz, Duel, Play, Test, Time, Learn, Hard), sweep the other 7 topics, enter the 7 other hub games, perform a real Equations drag, exercise the main-menu utility tiles (profile, 文/A language, reset) and the result screen's RESTART and bottom-bar icons, and verify progress persistence.
+- [ ] Continue mapping other game-mode assets/classes only as static candidate evidence; no unverified mode should be implemented.
 
 ## Environment
 - Workspace had no existing source project or package metadata.
 - Node 24.22.0, npm 11.4.1 and TypeScript 5.8.3 are installed globally; TypeScript compiler is callable with `node .../typescript/bin/tsc` because PowerShell script execution blocks `tsc.ps1`.
 - Android SDK is at `C:\Users\Administrator\AppData\Local\Android\Sdk`; platform images 34/35/36.1 and a Pixel_6 AVD are present.
-- ADB fails with `Cannot mkdir '\.android': Permission denied` even after workspace-local home variables; direct emulator boot was observed previously, but app installation was not possible.
+- ADB now works: `C:\Users\Administrator\.android` had to be created manually (the daemon could not create it itself), after which `adb devices` enumerates the AVD. The emulator is launched headless with `ANDROID_AVD_HOME=C:\Users\Administrator\.android\avd` and `emulator -avd Pixel_6 -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot`.
 - REA instructions are installed but REA tools are not registered; no JADX/REA CLI. `aapt`, `apksigner`, and `dexdump` are available.
-- No Expo/React Native dependencies are present in the workspace. Network access is restricted, so dependency restore and Expo package compatibility cannot currently be verified.
+- Expo/React Native dependencies are installed (299 packages) and the project typechecks with `tsc --noEmit`; a native Android build has not been attempted yet.
 
 ## Evidence rules
 Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRED (supported by repeated observations), or UNKNOWN. APK class/resource names confirm packaged components only, not accessibility or behavior. DEX semantics are static implementation evidence and not black-box observation.
 
 ## Current milestone report (2026-10-19)
 
-- Analyzed this iteration: Math Pieces drag touch start, accepted drop transfer, keyed-tag and row/column bookkeeping branches from static DEX.
+### Iteration: M2 runtime observation of the exact APK (OpenCode)
+
+- Analyzed: the supplied APK v14.2 executed on a Pixel 6 AVD (Android 17, 1080x2400) — splash, main menu, games hub, topic mode-select, an Addition Practice round, the result screen and its review sheet, the settings dialog and night theme, the Equations level list and the Equations-Easy board.
+- Evidence collected: `research/observations/RUNTIME_FIRST_PASS.md` (full observation log), 44 screenshots and 7 `uiautomator` UI hierarchies under `research/observations/runtime/`, and E-RT-001 … E-RT-018 in `research/EVIDENCE_LOG.md`.
+- Specs updated: SCREEN_SPECIFICATIONS (9 runtime screens), NAVIGATION_MAP (runtime edges), GAME_MODES, GAME_RULES, SCORING_SYSTEM, DIFFICULTY_SYSTEM, FUNCTIONAL_SPECIFICATION, UNKNOWN_BEHAVIOR, TEST_MATRIX.
+- Implemented: nothing (M4 is deliberately not started; the user directed that implementation wait until M2 is complete).
+- Environment: `C:\Users\Administrator\.android` had to be created manually to fix the ADB profile-path failure; `npm install` succeeded on a hardened retry (299 packages) — `tsc --noEmit` clean, 26/26 tests pass (E-ENV-007).
+- Differences found: the live Equations board is 5x5 while the packaged `timerGameLevels` dataset is 7x8/8x9/9x10 — the dataset belongs to another variant, and the DEX class analysed earlier (`Game_MathPieces_Activity`) is not the class that runs live (`GameEquationsEasy`).
+- Remaining: the 7 unplayed modes, the 7 unplayed topics, the 7 unplayed mini-games, the Equations drag interaction, persistence of progress, and the main-menu utility tiles.
+
+### Previous iteration: Math Pieces static refinement
+
+- Analyzed: Math Pieces drag touch start, accepted drop transfer, keyed-tag and row/column bookkeeping branches from static DEX.
 - Evidence added: E-APK-019 and E-IMPL-010; DEX-MP-005.
 - Implemented this iteration: isolated accepted-drop text transfer (target receives source text; source clears). No app UI integration.
 - Tests this iteration: `npm.cmd test` passed 23/23; strict standalone TypeScript check passed. The PowerShell `npm` shim was blocked by execution policy; `.cmd` invocation worked.
@@ -68,10 +88,10 @@ Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRE
 - [x] Workspace/SDK/REA/automation inventory.
 - [x] APK metadata, DEX/resource/data inventory.
 - [x] Record selected static behavior findings and confidence/limits.
-- [ ] Establish runtime observation of the exact APK.
-- [ ] Observe all reachable screens/modes across sessions and complete evidence-linked specifications.
+- [x] Establish runtime observation of the exact APK.
+- [ ] Observe all reachable screens/modes across sessions and complete evidence-linked specifications. *(in progress: 9 screens / 1 topic / 1 mode + Equations captured)*
 - [x] Create the independent RN app shell and check the official Expo SDK 58 version matrix.
-- [ ] Restore packages, verify with the local Expo CLI, typecheck and build the Android app.
+- [x] Restore packages, verify with the local Expo CLI, typecheck and build the Android app. *(packages restored, typecheck clean; Android build pending)*
 - [ ] Implement all verified flows/modes, persistence and settings.
 - [ ] Differential and automated/device testing.
 - [ ] Build Android and audit all completion criteria.

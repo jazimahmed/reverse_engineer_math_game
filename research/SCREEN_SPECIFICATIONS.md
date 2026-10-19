@@ -1,12 +1,103 @@
 # Screen specifications
 
-No screen has been observed at runtime. Static layout resources suggest candidate screens for splash, main, arithmetic categories, individual games, results, settings, language, user profile, and multiplayer. Treat these as candidate screens only.
+Screens have now been observed at runtime (2026-10-19, emulator run of the supplied APK v14.2). Sections are ordered newest-first: "Runtime-observed screens" is live observation; the older static sections below it remain candidate-only evidence.
 
 For each observed screen record purpose, device resolution/density/orientation, component bounds, entry/exit routes, control actions, transitions, loading/error states, and capture references.
 
 | Screen ID | Purpose / layout | Entry / exit | Confidence | Evidence |
 |---|---|---|---|---|
 | Candidate screens above | Runtime appearance and behavior unknown | Unknown | UNKNOWN | APK layout-name inventory only |
+
+## Runtime-observed screens
+
+Device: Pixel 6 AVD, Android 17, **1080x2400**, portrait. All bounds below are raw device pixels from `uiautomator` dumps (stored under `research/observations/runtime/ui/`) and screenshots (`research/observations/runtime/*.png`).
+
+### SCR-01 — Splash (`.SplashScreenActivity`)
+
+- Purpose: branded loading screen.
+- Layout: white background; **GA STUDIOS** logo bottom-left, version text **"v14.2"** bottom-right, green circular progress indicator at centre.
+- Exit: auto-advances to `.MainActivity` after the Lottie animation completes (10-15 s observed on a cold emulator start).
+- Confidence: CONFIRMED (E-RT-001, E-RT-017).
+
+### SCR-02 — Main menu (`.MainActivity`)
+
+- Purpose: entry to the 8 topic tiles and 4 utility actions.
+- Top bar (4 tiles, left→right): profile avatar (red), settings gear (green), language switch (blue, "文/A"), reset progress (pink circular arrow).
+- Body: 2 columns x 4 rows of topic tiles on a light-blue checkered background: **Add** (green `+`), **Subtract** (light blue `−`), **Multiply** (orange `×`), **Division** (pink, drawn as a checkmark-style glyph in this build), **Square root** (purple `√`), **Decimals** (teal `0.1`), **Fractions** (blue `2/3`), **Games** (dark green gamepad).
+- Behaviour: the tile grid animates in (briefly empty immediately after returning from a child screen).
+- Exit: topic tiles → their topic activity; the gamepad tile → the Games hub (SCR-03); gear → Settings (SCR-07).
+- UNKNOWN: profile tile behaviour, reset-tile behaviour, language switch behaviour, tile press sound.
+- Confidence: CONFIRMED (E-RT-002).
+
+### SCR-03 — Games hub (`.game.GameActivity`)
+
+- Purpose: entry to the 8 mini-games.
+- Header: back arrow (left), crown icon (right) for leaderboards.
+- Body: 2 columns x 4 rows of tiles — **2048, Fifteen, Puzzle, Match, Sudoku, Mix, Memory, Equations** — scrollable, list continues below the fold.
+- Behaviour: opening the hub raised the **Google Sign-In** activity (`com.google.android.gms/.auth.api.signin.ui.SignInActivity`), i.e. an account gate for the online feature; the exact trigger element is INFERRED to be the crown.
+- Exit: a game tile → that game's activity; back → SCR-02.
+- UNKNOWN: all seven non-Equations games; leaderboard content; sign-in cancellation behavior.
+- Confidence: CONFIRMED for the tile list and the sign-in gate (E-RT-003).
+
+### SCR-04 — Topic mode-select (`.addition.AdditionActivity`)
+
+- Purpose: choose a mode for the topic.
+- Header: back arrow, green topic title ("Addition") with a play triangle, red gear-with-"1" button.
+- Body: 2 columns x 4 rows of mode tiles — **Practice** (book), **Quiz** (thinker "?"), **Duel** (two silhouettes), **Play** (triangle), **Test** (✓/✗), **Time** (stopwatch), **Learn** (box grid + ?), **Hard** (equation boxes + ?) — scrollable (Learn/Hard sit at the viewport bottom).
+- Exit: a mode tile → that mode's activity; back → SCR-02.
+- UNKNOWN: the gear-with-"1" dialog, whether other topics expose the identical 8 modes.
+- Confidence: CONFIRMED for Addition (E-RT-004).
+
+### SCR-05 — Practice round (`.addition.AdditionGame1Activity`)
+
+- Purpose: answer 10 arithmetic questions.
+- Header: back arrow, progress `qno` + `question` ("1/10"), settings gear (pink).
+- Under the gear: a red **pencil/edit** button.
+- Counters: `right1` (green chip) and `wrong1` (red chip) on the right of the question area.
+- Question line: `n1` `sgn` `n2` `eql` `ans` (operand, sign, operand, equals, answer).
+- Answers: `opt1`–`opt4` in a 2x2 grid, coloured light blue / orange / yellow / purple.
+- Background states: light blue (idle), green flash (correct), orange (the 10/10 question).
+- Exit: after the 10th answer → SCR-06.
+- UNKNOWN: the pencil button, the gear dialog, sound effects, whether several wrong options may be marked in one question.
+- Confidence: CONFIRMED (E-RT-005/006/007).
+
+### SCR-06 — Result (`.ResultActivity`)
+
+- Purpose: round summary.
+- Title `text` = "Score" (underlined); `crct` = "Correct"; `tv_eq1` = "="; `rt` = correct count; `wrng` = "Wrong"; `tv_eq2` = "="; `wr` = wrong count.
+- Controls: `restart` = "RESTART" (cyan), `exit` = "EXIT" (purple), a green checklist icon, and a shared 3-icon bottom bar (thumbs-up / refresh / pink).
+- Review sheet: the green checklist icon opens a white, green-bordered scrollable dialog listing every question of the round in order with a green checkmark ("7 + 10 = 17" … "2 + 8 = 10"), closed by a red X.
+- Exit: EXIT → SCR-04 (topic mode-select, not the main menu); RESTART unobserved.
+- UNKNOWN: the three bottom-bar icons; how wrong answers render in the review sheet; star/medal presentation; per-level persistence.
+- Confidence: CONFIRMED (E-RT-008/009/010).
+
+### SCR-07 — Settings (`SettingsActivity`)
+
+- Purpose: global toggles.
+- Appearance: a **purple dialog** titled "Settings" with a white X close button and three toggle rows — Music (music-note icon), Sound (speaker icon), Night (crescent icon). Each toggle shows a knob: ON = red knob right, OFF = white knob left.
+- The shared 3-icon bottom bar appears here too, so it is a common footer rather than a result-only element.
+- Night ON switches the whole app to a dark theme (near-black background, dark grey tiles with light-grey borders, white glyphs) and **persists across force-stop + relaunch**.
+- UNKNOWN: Music/Sound effects on playback, whether Night applies to every activity, profile persistence.
+- Confidence: CONFIRMED (E-RT-011).
+
+### SCR-08 — Equations level list (`.game.Game_equation_levels_Activity`)
+
+- Purpose: pick an Equations level.
+- Layout: 4-column grid of numbered level tiles; level 1 unlocked, every other tile shows a padlock icon; a back arrow top-left; long scrollable list (40+ levels observed; the packaged asset for the timed variant holds 150).
+- Exit: a level tile → SCR-09; back → SCR-03.
+- UNKNOWN: unlock conditions, per-level star display, how many levels exist in this variant.
+- Confidence: CONFIRMED (E-RT-012).
+
+### SCR-09 — Equations board (`.game.GameEquationsEasy`)
+
+- Purpose: fill the crossword-style equation board.
+- Header: back arrow, a wide empty panel, and a stopwatch counter on the right (counts **down**; 43 → 40 over 1.5 s).
+- Board: 5 columns. Row 1 renders a complete equation `58 + 87 = [?]`, row 2 `18 - 8 = [?]`, further bands render operator-only rows (`+ -`, `= =`) and empty `?` placeholders — rows and columns are both 5-cell equations whose answer cells are shared `?` tiles.
+- Tray (bottom): draggable pieces `1 2 3 4 5 ⌫` on the first line, `6 7 8 9 0` on the second, plus an **AD** lightbulb hint tile.
+- Help overlay: on entry a large red circle with a red X and a white ▶ triangle covers the board; the timer reads 0 and input is blocked.
+- Observed outcome: tapping ▶ dismisses the overlay and reveals a playable board with the countdown running, but within a few seconds the activity finishes itself and the app returns to SCR-08 (no crash, no ANR) — consistent with the static `completeEqTwo(value)` → `gameOver()` mismatch path.
+- UNKNOWN: the actual drag interaction (no successful drag was performed), answer-cell feedback styling, completion/star presentation, the AD hint, and the empty header panel's meaning.
+- Confidence: CONFIRMED for the rendered layout and the self-ending behavior (E-RT-013/014/015); grid geometry is INFERRED.
 
 ## Static MainActivity candidate
 
