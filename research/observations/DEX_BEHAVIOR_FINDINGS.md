@@ -154,6 +154,16 @@ Implemented slices are the random-number arithmetic evaluator, selection-categor
 - `Result_Game2Activity.onBackPressed()` starts `GameActivity` (generic games menu) after calling the platform back handler.
 - The compiled result layout contains level/rank fields and control groups named `bg_next`, `bg_restart`, `bg_exit`, `bg_fb`, `bg_rate`, and `bg_share`, plus an ad placeholder. These names/resource contents do not confirm rendered labels or which controls are visible for RANDOM_NUMBER.
 
+## DEX-MP-006 - Math Pieces drop-triggered check pass and attempt counters
+
+- Confidence: CONFIRMED for the static chain and counter semantics; runtime reachability UNKNOWN.
+- Drop → check: an accepted drop posts `MyDragListener$2` immediately; it performs the transfer branch, restores the source view and schedules `MyDragListener$2$1` 100 ms later. Both `MyDragListener$1` (scheduled after 100 ms on another drop branch) and `MyDragListener$2$1` call `clearHintAnimation()`/static `x()` → `checkCorrectEquation()`. `setTextOnCells()` separately schedules an unrelated 200 ms board-clear runnable (`Game_MathPieces_Activity$4`).
+- Check pass: `checkCorrectEquation()` rebuilds all row/column `PieceEquation` objects fresh (`isCorrect=false`), resets `score` to 0, valid lines become `setCorrect(true)` + styling + `score++`; completion calls `onGameComplete()` only in the pass where `score` equals the master `equations` list (rows + columns, cleared and repopulated by `loadData()` via `reset()`/`setTextOnCells()`). On completion it also adds `equations.size()` to correctAttempts.
+- Counters: `calculateResult()`'s debug logs name `field@74c2` as correctAttempts (`o`) and `field@74c3` as wrongAttempts (`p`). correctAttempts never changes except `+equations.size()` on a completing pass. wrongAttempts increments only in `checkEquations()` failure branches, de-duplicated per container tag in `equtaionTags` (`field@74a2`). Both counters reset to 0 in the constructor and `reset()`. `checkEquationCorrect()`/`onWrongEquation()` are styling-only.
+- Timer: `time`, `totalMiliseconds`, `totalseconds`, `secVar`, `resumeVal` and `fixedTimeInMS` fields exist but the dump has no nonzero write; the timer's effect on the mode remains UNKNOWN.
+- Evidence: `classes_dump.txt` lines 918427–919006 (runnables), 919598–919694 (`checkCorrectEquation`), 919955–919988 (deduped wrong-attempt sites), 921357–921401 (`reset`), 921510–921882 (`setTextOnCells`), 922100–922149 (`calculateResult` logs), and E-APK-020.
+- Limits: the APK was not launched; run-time pass cadence (both runnables per drop?), visual feedback, sound, and level reachability are unobserved.
+
 ## DEX-RN-011 - Level-list help dialog
 
 - Confidence: CONFIRMED (static dialog wiring and packaged illustration references); intended objective INFERRED from illustration content.

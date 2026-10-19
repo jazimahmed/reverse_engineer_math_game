@@ -21,10 +21,20 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 - [x] Copied the exact 150-level Math Pieces dataset and added schema parsing plus APK-derived 7×8, 8×9 and 9×10 grid configuration (E-APK-018).
 - [x] Added a root Expo/TypeScript scaffold and documented an Expo SDK 58 package matrix matching its official bundled native versions (E-ENV-006).
 - [x] Inspected Math Pieces touch/drop DEX: drag starts from a tagged tile; accepted drop transfers text/tag and clears the source. Added isolated transfer helper and evidence (E-APK-019, E-IMPL-010).
-- [ ] Dependency install remains unverified: npm cannot access `registry.npmjs.org` (`EACCES`), so Expo CLI, RN packages, lockfile and Android build are unavailable.
 - [x] Ran `npm.cmd test`: 23 Node test cases passed; strict TypeScript compile passed for Math Pieces domain module using global `tsc.cmd`.
+- [ ] Dependency install: registry.npmjs.org became TCP/HTTP reachable from the OpenCode environment (HTTP 200 on `/expo`); the first full `npm install` ran ~40 minutes and failed with `read ECONNRESET` during package unpacking (not an access/EACCES failure). A hardened retry (`--fetch-retries=10 --fetch-timeout=900000`) is in progress. Lockfile, typecheck and Android build remain unavailable until it completes.
 - [ ] Runtime reference observation remains unavailable; ADB still fails before device enumeration (`Cannot mkdir '\.android': Permission denied`) despite workspace-local Android home variables.
 - [ ] Continue mapping other game-mode assets/classes only as static candidate evidence; no unverified mode should be implemented.
+
+## OpenCode continuation — 2026-10-19 (Codex session migration)
+- [x] Migrated from Codex (session `01a152b3-06b9-7223-9312-c00a3e27a873`): read the rollout transcript on disk, confirmed user direction ("reengineer given apk" — supplied APK is the active fidelity target), and reconciled the final, cut-off turn.
+- [x] Initialized git at the workspace root; first commit preserves all Codex work verbatim (`research/` evidence, domain code, tests, scaffold) excluding the 5.2 GB regenerable `.android-user` runtime directory and local logs/emulator artifacts.
+- [x] Verified independently in `classes_dump.txt`: the Codex claim "each accepted drop schedules a 100 ms check" is true (via `MyDragListener$1`/`MyDragListener$2$1` runnables → static `x()` → `checkCorrectEquation()`), and located the separate 200 ms `Game_MathPieces_Activity$4` board-clear schedule that is not the check (E-APK-020).
+- [x] Answered the session's open question (attempt counters): `PieceEquation.checkEquationCorrect()`/`onWrongEquation()` are styling-only; `calculateResult()`'s debug logs name `field@74c2` = correctAttempts (`o`) and `field@74c3` = wrongAttempts (`p`); wrongAttempts increments only inside `checkEquations()` failure branches, de-duplicated per container tag (`equtaionTags`, field@74a2); correctAttempts grows only `+equations.size()` on a completing pass; both reset to 0 in the constructor and `reset()`. `loadData()` calls `reset()` → `setTextOnCells()`, making the master `equations` list rows + columns per level (E-APK-020).
+- [x] Refined `checkMathPiecesEquations()` with the verified semantics plus optional per-key wrong-attempt dedupe; added 3 test cases (26 total, all passing); strict standalone `tsc --strict` passes for all three domain modules (E-IMPL-011).
+- [x] Updated evidence/specification docs: EVIDENCE_LOG (E-APK-020, E-IMPL-011), DEX_BEHAVIOR_FINDINGS (DEX-MP-006), GAME_RULES, GAME_MODES, SCORING_SYSTEM, UNKNOWN_BEHAVIOR, FUNCTIONAL_SPECIFICATION, TEST_MATRIX (new MP-CHECK-PASS row).
+- [ ] Dependency restore retry and `tsc --noEmit` full app typecheck (blocked on npm install completion).
+- [ ] ADB fix attempt (planned): Windows profile-path resolution (`\.android` mkdir failure) — iterate `ANDROID_AVD_HOME`/`ANDROID_PREFS_ROOT`/`ANDROID_USER_HOME` combinations and direct `adb -a` server start.
 
 ## Environment
 - Workspace had no existing source project or package metadata.

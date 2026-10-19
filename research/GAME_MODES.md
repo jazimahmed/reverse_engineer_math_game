@@ -18,7 +18,9 @@ No mode has been behaviorally verified. The current Play listing for this packag
 
 ### Math Pieces static refinement
 
-`Game_MathPieces_Activity` checks five-cell equations from both row and column collections and computes `calculateResult()` stars when `onGameComplete()` runs (E-APK-016/017). The packaged 150-level asset and `setGridRowColumn()` establish three board dimensions (E-APK-018). These support the inferred objective of arranging pieces into valid equations across the grid. Data parsing, grid dimension selection, line validation and star rating are standalone helpers in `src/domain/mathPieces.ts`. Drag/drop interaction, timer behavior, completion trigger, counter updates, level persistence, and runtime reachability remain unknown.
+`Game_MathPieces_Activity` checks five-cell equations from both row and column collections and computes `calculateResult()` stars when `onGameComplete()` runs (E-APK-016/017). The packaged 150-level asset and `setGridRowColumn()` establish three board dimensions (E-APK-018). Data parsing, grid dimension selection, line validation, star rating, and the drop-triggered check pass are standalone helpers in `src/domain/mathPieces.ts` (E-IMPL-010/011).
+
+Completion is now statically resolved (E-APK-020): after every accepted drop the APK schedules `checkCorrectEquation()` 100 ms later; that pass rebuilds all row/column equations fresh, marks valid lines, and completes the level only when every equation in the pass is newly valid (score equals the rows + columns master list that `loadData()` establishes). Wrong-attempt counting is de-duplicated per equation-container tag; attempt counters reset per level via `reset()`. Still unknown: drag acceptance rules at runtime, timer effect (`fixedTimeInMS` has no nonzero write), feedback presentation, level persistence, and reachability.
 
 ## Static code-path refinement
 

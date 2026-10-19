@@ -45,7 +45,9 @@ The exact 150-level asset is copied to `src/domain/data/mathPiecesLevels.json`. 
 
 The independently implemented rule is limited to one complete five-cell line: recognized operators evaluate adjacent integer operands; the result must appear at either end adjacent to `=`. Subtraction uses the nonnegative absolute difference, division uses integer quotient, and the APK converts results to float before `Math.round()`. This does not model the board or state transitions.
 
-One isolated static scoring rule is established by DEX-MP-002: `calculateResult()` returns 0 when correct attempts are zero; otherwise it maps `correct / (correct + wrong) * 100` to 2 stars for 40–90% inclusive, 3 for >90–100%, and 1 for other values. `onGameComplete()` stores the rating on the level object when non-null and invokes `gameOver()`. The line check and score formula in `src/domain/mathPieces.ts` are only isolated helpers, not a complete gameplay implementation.
+The completion trigger is statically resolved by E-APK-020 / DEX-MP-006: 100 ms after every accepted drop, `checkCorrectEquation()` rebuilds all row/column equations (fresh per pass), marks valid ones, and ends the level only when every line is valid in that one pass (`score == equations.size()`, the rows + columns master list `loadData()` establishes per level); then `calculateResult()` stores stars per E-APK-016. Wrong-attempt counting is de-duplicated per container tag, and attempt counters reset per level. `checkMathPiecesEquations()` in `src/domain/mathPieces.ts` models a pass; callers must rebuild their input with `isCorrect=false` on each pass for parity.
+
+Timer behavior remains unspecified due to missing evidence (the timer fields have no nonzero write in the dump), and no UI exists. Do not implement a countdown, score display, or persistence without further evidence.
 
 ## Candidate mode: Multiplayer room question generation
 

@@ -58,10 +58,11 @@ The complete 250-record level asset is copied to `src/domain/data/randomNumberLe
 
 ## Math Pieces completion rating
 
-- **CONFIRMED (static DEX):** `Game_MathPieces_Activity.calculateResult()` returns 0 when the correct-attempt count is zero. Otherwise it computes `correct / (correct + wrong) * 100` and maps 40–90% inclusive to 2 stars; above 90% through 100% to 3 stars; all other percentages to 1 star.
+- **CONFIRMED (static DEX):** `Game_MathPieces_Activity.calculateResult()` returns 0 when the correct-attempt count is zero. Otherwise it computes `correct / (correct + wrong) * 100` and maps 40–90% inclusive to 2 stars; above 90% through 100% to 3 stars; all other percentages to 1 star. Boundary float constants 40.0 (0x42200000), 90.0 (0x42B40000), and 100.0 (0x42C80000) were re-verified in the dump.
 - **CONFIRMED (static DEX):** `onGameComplete()` stores the calculated star count on the active `PiecesGameLevel` when that object is non-null, then invokes `gameOver()`.
-- **UNKNOWN:** Which player actions increment the counters, when completion is triggered, timer limits, persistence, and the result-screen display. This isolated scoring rule does not specify the mode's gameplay.
-- The independent implementation in `src/domain/mathPieces.ts` models only this calculation for nonnegative attempt counts.
+- **CONFIRMED (static DEX, 2026-10-19, E-APK-020):** attempt-counter wiring — see `SCORING_SYSTEM.md`. correctAttempts grows only `+equations.size()` on a fully valid check pass; wrongAttempts grows once per unique failing container tag (`equtaionTags`); both reset in the constructor and `reset()`.
+- **UNKNOWN:** Runtime feedback, whether timer expiry can end a round (timer fields have no nonzero write in the dump), persistence, and reachability.
+- The independent implementation in `src/domain/mathPieces.ts` models the calculation and the check-pass behavior (`checkMathPiecesEquations()`).
 
 ## Math Pieces line validation
 

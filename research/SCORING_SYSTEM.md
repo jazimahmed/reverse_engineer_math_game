@@ -14,4 +14,14 @@ Still to observe per game: initial score, correct/incorrect effects, time bonuse
 - Above 90% through 100%, inclusive → 3 stars.
 - Other percentages → 1 star.
 
-`onGameComplete()` assigns this value to the active level's stars before entering `gameOver()`. Confidence is **CONFIRMED for the DEX path**, but UI interpretation, persistence, and the events that increment each counter are **UNKNOWN**. Implementation is in `src/domain/mathPieces.ts`.
+`onGameComplete()` assigns this value to the active level's stars before entering `gameOver()`. Confidence is **CONFIRMED for the DEX path** (E-APK-016, boundary constants re-verified 2026-10-19). UI interpretation, persistence, and mode reachability remain **UNKNOWN**. Implementation is in `src/domain/mathPieces.ts`.
+
+## Math Pieces attempt counters — static DEX evidence
+
+Counter wiring is now statically resolved (E-APK-020); it is no longer unknown how attempts accrue:
+
+- `calculateResult()`'s debug logs identify its own fields: field `o` = correctAttempts, field `p` = wrongAttempts.
+- correctAttempts increases only by `+equations.size()` when a check pass marks an entire pass newly correct (`checkCorrectEquation()`), i.e., at level completion time.
+- wrongAttempts increases only inside `checkEquations()` failure branches, de-duplicated per equation-container tag (`equtaionTags`): each container counts at most once, its first failure.
+- Both counters reset to 0 in the activity constructor and in `reset()`.
+- The timer fields (`fixedTimeInMS` etc.) receive no nonzero value in the dump; timing behavior remains UNKNOWN.

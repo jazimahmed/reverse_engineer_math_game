@@ -201,25 +201,67 @@ export interface MathPiecesCheckResult {
   equations: MathPiecesEquationState[];
   newlyCorrectCount: number;
   wrongEquationIndexes: number[];
+  /**
+   * Failures not previously reported for their key. Mirrors the APK's
+   * `equtaionTags` (sic) de-duplication: a failing equation's container tag
+   * increments wrongAttempts only the first time it appears. Caller-owned key
+   * state; when no keys are supplied, every failure counts.
+   */
+  newWrongAttemptCount: number;
+  /** Keys recorded as reported-after-wrong by this call (DEX: equtaionTags). */
+  reportedWrongKeys: Array<string | number>;
   gameComplete: boolean;
 }
 
+export interface MathPiecesCheckOptions {
+  /**
+   * Key per equation, parallel to `equations`. The APK keys its passes by
+   * each row/column container's LinearLayout tag, so one key per equation
+   * record is the matching granularity.
+   */
+  keys?: readonly (string | number)[];
+  /** Mutable caller-owned set of key values already counted as wrong. */
+  reportedWrongKeys?: Set<string | number>;
+}
+
 /**
- * Mirrors the state portion of checkCorrectEquation(). The APK rebuilds its
- * row/column equation list after a drop, resets a local score, marks only
- * newly correct lines, and ends the game when that score equals the current
- * list size. Its view styling and de-duplicated wrong-attempt accounting use
- * Android parent tags and are deliberately not represented here.
+ * Mirrors the state portion of checkCorrectEquation() (DEX verified, E-APK-020).
+ * The APK rebuilds every PieceEquation for a pass from the live cell views with
+ * isCorrect=false, resets a local score, marks valid lines correct, and calls
+ * onGameComplete() only when that score reaches the master `equations` list
+ * size, which loadData() establishes as rows + columns per level via
+ * reset()/setTextOnCells(). Callers must therefore rebuild this input array
+ * with isCorrect=false on every pass to preserve DEX parity; a persistent
+ * isCorrect=true input models state the APK does not carry across passes
+ * and changes the completion decision.
+ *
+ * Styling-only PieceEquation callbacks (checkEquationCorrect/onWrongEquation)
+ * never touch the attempt counters: correctAttempts (DEX field `o`) grows only
+ * by +equations.size() on a completing pass inside checkCorrectEquation(), and
+ * wrongAttempts (DEX field `p`) grows only inside checkEquations()
+ * de-duplicated per container tag; both reset to zero in the class constructor
+ * and in reset().
  */
 export function checkMathPiecesEquations(
   equations: readonly MathPiecesEquationState[],
+  options: MathPiecesCheckOptions = {},
 ): MathPiecesCheckResult {
   let newlyCorrectCount = 0;
+  let newWrongAttemptCount = 0;
+  const reportedWrongKeys: Array<string | number> = [];
   const wrongEquationIndexes: number[] = [];
   const next = equations.map((equation, index) => {
     const valid = isMathPiecesEquationCorrect(equation.cells);
     if (!valid) {
       wrongEquationIndexes.push(index);
+      if (options.keys !== undefined && options.reportedWrongKeys !== undefined) {
+        const key = options.keys[index];
+        if (!options.reportedWrongKeys.has(key)) {
+          options.reportedWrongKeys.add(key);
+          reportedWrongKeys.push(key);
+          newWrongAttemptCount += 1;
+        }
+      }
       return { ...equation };
     }
     if (equation.isCorrect) return { ...equation };
@@ -231,6 +273,8 @@ export function checkMathPiecesEquations(
     equations: next,
     newlyCorrectCount,
     wrongEquationIndexes,
+    newWrongAttemptCount,
+    reportedWrongKeys,
     gameComplete: next.length > 0 && newlyCorrectCount === next.length,
   };
 }

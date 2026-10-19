@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import {
   buildMathPiecesGridConfig,
   calculateMathPiecesStars,
+  checkMathPiecesEquations,
   isMathPiecesEquationCorrect,
   parseMathPiecesLevelDataset,
   transferMathPiece,
@@ -81,4 +82,59 @@ test('models an accepted APK drag drop as target copy and source clear, not swap
   assert.deepEqual(transferMathPiece(['2', '+', '3', '', '5'], 0, 3), ['', '+', '3', '2', '5']);
   assert.deepEqual(transferMathPiece(['tile'], 0, 0), ['tile']);
   assert.throws(() => transferMathPiece(['tile'], 0, 1), RangeError);
+});
+
+test('ends the game only when every rebuilt equation is newly correct in one pass', () => {
+  // Per DEX, each pass rebuilds PieceEquation objects with isCorrect=false, so
+  // a faithful input starts every record as not-yet-correct.
+  const freshFull = [
+    { cells: ['2', '+', '3', '=', '5'], isCorrect: false },
+    { cells: ['4', '=', '6', '-', '2'], isCorrect: false },
+  ];
+  const full = checkMathPiecesEquations(freshFull);
+  assert.equal(full.gameComplete, true);
+  assert.equal(full.newlyCorrectCount, 2);
+  assert.deepEqual(full.newWrongAttemptCount, 0);
+  assert.ok(full.equations.every((equation) => equation.isCorrect));
+
+  const freshPartial = [
+    { cells: ['2', '+', '3', '=', '5'], isCorrect: false },
+    { cells: ['4', '+', '6', '=', '11'], isCorrect: false },
+  ];
+  const partial = checkMathPiecesEquations(freshPartial);
+  assert.equal(partial.gameComplete, false);
+  assert.equal(partial.newlyCorrectCount, 1);
+  assert.deepEqual(partial.wrongEquationIndexes, [1]);
+});
+
+test('does not complete an empty pass, mirroring the DEX size-0 skip', () => {
+  const empty = checkMathPiecesEquations([]);
+  assert.equal(empty.gameComplete, false);
+  assert.equal(empty.newlyCorrectCount, 0);
+});
+
+test('counts wrong attempts once per repeated equation key like equtaionTags', () => {
+  const board = [
+    { cells: ['1', '+', '1', '=', '3'], isCorrect: false },
+    { cells: ['5', '+', '2', '=', '9'], isCorrect: false },
+  ];
+  const keys = ['row1', 'col2'];
+  const reported = new Set();
+
+  const first = checkMathPiecesEquations(board, { keys, reportedWrongKeys: reported });
+  assert.equal(first.newWrongAttemptCount, 2);
+  assert.deepEqual(first.reportedWrongKeys, ['row1', 'col2']);
+
+  const repeat = checkMathPiecesEquations(board, { keys, reportedWrongKeys: reported });
+  assert.equal(repeat.newWrongAttemptCount, 0);
+
+  const recovered = checkMathPiecesEquations(
+    [
+      { cells: ['1', '+', '1', '=', '2'], isCorrect: false },
+      { cells: ['5', '+', '2', '=', '7'], isCorrect: false },
+    ],
+    { keys, reportedWrongKeys: reported },
+  );
+  assert.equal(recovered.newWrongAttemptCount, 0, 'row1 key already reported');
+  assert.equal(recovered.gameComplete, true);
 });
