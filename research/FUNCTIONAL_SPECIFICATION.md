@@ -2,13 +2,13 @@
 
 This specification describes behavior of the supplied APK v14.2. It now mixes **runtime-observed** behavior (the APK is installed and running on an emulator since 2026-10-19) with static code evidence. Sections are labeled accordingly; the older static sections remain candidate-only.
 
-## Runtime-verified behavior (2026-10-19)
+## Runtime-verified behavior (2026-10-19/20)
 
-Evidence: `research/observations/RUNTIME_FIRST_PASS.md`; E-RT-001 … E-RT-018; screenshots in `research/observations/runtime/`.
+Evidence: `research/observations/RUNTIME_FIRST_PASS.md`; E-RT-001 … E-RT-027; screenshots in `research/observations/runtime/`.
 
 ### Boot and navigation
 
-Splash (GA STUDIOS logo, "v14.2", green progress dot) → MainActivity (4 utility tiles + 8 topic tiles) → topic mode-select (8 mode tiles) → mode activity → ResultActivity → back to the topic mode-select. The 8th main-menu tile (gamepad) opens the Games hub (8 mini-games) rather than an arithmetic topic; its crown opens Google Sign-In.
+Splash (GA STUDIOS logo, "v14.2", green progress dot) → MainActivity (4 utility tiles + 8 topic tiles) → topic mode-select (mode sets vary per topic) → mode activity → ResultActivity → back to the topic mode-select. The 8th main-menu tile (gamepad) opens the Games hub (8 mini-games) rather than an arithmetic topic; its crown opens Google Sign-In.
 
 ### Addition → Practice (CONFIRMED)
 
@@ -19,6 +19,38 @@ Splash (GA STUDIOS logo, "v14.2", green progress dot) → MainActivity (4 utilit
 - The 10/10 question shows an orange background.
 - After the last answer → ResultActivity: "Score", "Correct" = first-try correct count, "Wrong" = retry count, RESTART (unobserved), EXIT (→ topic mode-select), a green checklist icon that opens a scrollable per-question review sheet, and a shared 3-icon bottom bar (thumbs-up / refresh / pink).
 
+### Addition → Quiz (CONFIRMED)
+
+- Identical structure to Practice but **missing-operand** format: `n1 sgn ? eql ans` (e.g., `9 + ? = 19`). Player selects the missing operand from 4 options. Same counter semantics.
+
+### Addition → Duel (CONFIRMED)
+
+- Split screen: top half rotated 180°, bottom half upright. Same question on both halves.
+- Four options per half (`opt1`–`opt4` top, `opt11`–`opt41` bottom).
+- Two chips: `right1` (bottom), `right11` (top). Correct bottom → `right11`+1; correct top → `right1`+1. Wrong → corresponding chip -1.
+- The two halves are mirrors; the "opponent" is a simultaneous view the player can interact with.
+
+### Addition → Test (CONFIRMED)
+
+- 10 True/False questions: a complete equation is shown (e.g., `2 + 5 = 12`), player judges True/False.
+- Wrong tap increments red counter immediately and does not advance. Correct tap advances.
+- Multiple wrong taps on the same question do not further increment red.
+
+### Addition → Time (CONFIRMED)
+
+- Same layout as Test (True/False), but **auto-advances** every ~4.5 s (question index increments without player input).
+- Wrong tap increments red immediately; correct tap advances.
+
+### Addition → Play (CONFIRMED layout, UNKNOWN completion)
+
+- Three simultaneous equations displayed, each with `?` answer cell.
+- On-screen keypad `key0`–`key9` (4x3 grid). Keypad fills `?` cells.
+- No visible counters, timer, or progress. Focus/selection/submission/completion UNKNOWN.
+
+### Addition → Learn (CONFIRMED entry, UNKNOWN gameplay)
+
+- Setup screen: 4 checkboxes for operand digit count ("3-5", "3", "4", "5") + "Start" button.
+
 ### Settings (CONFIRMED)
 
 A purple dialog with Music / Sound / Night toggles. Night = global dark theme and persists across force-stop + relaunch. Splash stays light-themed.
@@ -27,9 +59,18 @@ A purple dialog with Music / Sound / Night toggles. Night = global dark theme an
 
 Games hub → Equations → 4-column level list (level 1 unlocked, rest padlocked) → `GameEquationsEasy`: 5x5 crossword board where rows and columns are five-cell equations, a digit tray (1-9, 0, backspace, AD hint), a countdown stopwatch, and a tutorial overlay. Pressing ▶ on the overlay reveals a playable board but the level then ends by itself and the app returns to the level list — the runtime confirmation of the static `completeEqTwo` → `gameOver()` mismatch path.
 
+### Topic mode-sets (CONFIRMED, E-RT-019)
+
+Mode lists are **topic-specific**:
+- Addition / Subtraction: Practice, Quiz, Duel, Play, Test, Time, Learn, Hard (8)
+- Multiplication / Division: Learn, Exam, Practice, Quiz, Duel, Play, Test, Time (8, "Exam" replaces "Hard")
+- Square Root: Learn, Play, Practice (6)
+- Decimal: Addition, Subtract, Duel, Play (4, cross-topic)
+- Fraction: Addition, Subtract, Multiply, Division, Hard, Play (6, cross-topic)
+
 ### Explicitly not specified
 
-Everything not listed above (the other 7 modes, the other 7 topics, the other 7 mini-games, Duel/multiplayer, Random Number) remains UNKNOWN and must not be implemented from class names alone.
+Everything not listed above (the other topics' modes, the other 7 mini-games, Duel/multiplayer, Random Number) remains UNKNOWN and must not be implemented from class names alone.
 
 ## Candidate mode: Random Number
 

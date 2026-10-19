@@ -1,0 +1,15 @@
+## 11. Behavioural summary that the reimplementation must reproduce
+
+1. Boot: splash (GA STUDIOS + v14.2) → main menu.
+2. Main menu: 4 utility buttons + 8 topic tiles (games hub lives behind the gamepad tile).
+3. Topic screen: **mode sets vary per topic** (Addition/Subtraction = 8 modes including Practice/Quiz/Duel/Play/Test/Time/Learn/Hard; Multiply/Division = 9 modes with Learn/Exam/Practice/Quiz/Duel/Play/Test/Time; Square Root = 6 modes with Learn/Play/Practice; Decimal = 4 modes with Addition/Subtract/Duel/Play; Fraction = 6 modes with Addition/Subtract/Multiply/Division/Hard/Play).
+4. Addition → Practice: 10 questions, 4 options, first-try-correct scoring, wrong-answer lock on the option, red counter for retries, green flash on correct, orange background for the last question.
+5. Addition → Quiz: 10 questions, missing-operand format (`a + ? = r`), 4 options, same scoring.
+6. Addition → Duel: split screen (180° rotated opponent half), same question on both halves, two score chips (+1/-1 per half), 4 options each.
+7. Addition → Play: 3 simultaneous equations, on-screen keypad (0-9), completion/scoring unknown.
+8. Addition → Test: 10 True/False questions (judge displayed equation), same counter semantics.
+9. Addition → Time: True/False with auto-advance countdown (~4-5 s/question), same counter semantics.
+10. Addition → Learn: column-addition setup (digit count checkboxes), gameplay unobserved.
+11. Result: Score screen with Correct/Wrong, review sheet, RESTART/EXIT (EXIT → topic screen).
+12. Settings: Music, Sound, Night; persisted across force-stop+relaunch.
+13. Equations: level list → 5x5 crossword board with tray, countdown timer, tutorial overlay that ends the level.

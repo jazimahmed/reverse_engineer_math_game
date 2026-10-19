@@ -1,8 +1,8 @@
 # Game rules
 
-Rules for **Addition → Practice** and the **Equations** board are now verified at runtime (2026-10-19). Everything else below is still static-analysis evidence.
+Rules for **Addition → Practice**, **Addition → Quiz**, **Addition → Duel**, **Addition → Test**, **Addition → Time**, and the **Equations** board are now verified at runtime (2026-10-19/20). Everything else below is still static-analysis evidence.
 
-## Runtime-verified rules — Addition Practice (E-RT-005 … E-RT-007)
+## Runtime-verified rules — Addition Practice (E-RT-005 … E-RT-007, E-RT-020)
 
 - A round contains exactly **10 questions**; the header label "N/10" is the index of the question currently displayed, so "10/10" is still unanswered.
 - Each question shows two operands, a sign, an equals sign and an empty answer field, plus **four answer options** in a 2x2 grid; the correct value is always among the four.
@@ -10,6 +10,47 @@ Rules for **Addition → Practice** and the **Equations** board are now verified
 - Questions may repeat inside one round ("7 + 10" appeared twice), and distractor values recur across questions.
 - Answer validation: a correct option advances to the next question immediately; an incorrect option turns red and does **not** advance, so the same question must be answered again.
 - Background colours encode state: light blue = idle, green = correct-answer flash, orange = final question.
+- **Scoring semantics (E-RT-020):** the green chip counts **first-try correct** answers; the red chip counts **questions that needed a retry** (increments once when the correct answer is finally given after one or more wrong taps). Multiple wrong taps on the same question do not further increment the red chip.
+
+## Runtime-verified rules — Addition Quiz (E-RT-023)
+
+- Identical structure to Practice (10 questions, 4 options, same counters) but the equation format is **missing-operand**: `n1 sgn ? eql ans` (e.g., `9 + ? = 19`).
+- The player supplies the second operand. Same counter semantics (green = first-try correct, red = retry count).
+
+## Runtime-verified rules — Addition Duel (E-RT-022)
+
+- Split-screen: top half rotated 180° (opponent view), bottom half upright (player view).
+- Both halves display the **same question simultaneously** with identical option sets (`opt1`–`opt4` top, `opt11`–`opt41` bottom).
+- Two score chips: `right1` (bottom/player), `right11` (top/opponent). Both start at 0.
+- A correct tap on the **bottom half** increments `right11` (+1). A correct tap on the **top half** increments `right1` (+1).
+- A wrong tap on either half decrements the corresponding chip by -1.
+- The two halves are mirrors — the "opponent" is a simultaneous view the player can also interact with. No visible round counter (qno shows "-").
+
+## Runtime-verified rules — Addition Test (E-RT-021)
+
+- 10 questions, each shows a **complete equation** (e.g., `2 + 5 = 12`).
+- Two large buttons: **True** and **False**. The player judges whether the equation is correct.
+- A wrong tap increments the red counter (`wrong1`) immediately and does not advance.
+- A correct tap advances to the next question. The green counter (`right1`) was not observed to change.
+- Multiple wrong taps on the same question do not further increment `wrong1`.
+
+## Runtime-verified rules — Addition Time (E-RT-024)
+
+- Identical layout to Test (True/False on a complete equation).
+- **Countdown timer:** the question index (`qno`) increments automatically every ~4.5 s without player input.
+- Wrong tap increments `wrong1` immediately; correct tap advances.
+- Total round duration, pause behavior on wrong tap, and end-of-round behavior are UNKNOWN.
+
+## Runtime-verified rules — Addition Play (E-RT-025)
+
+- Three equations displayed simultaneously (three rows: `n1 sgn n2 eql ans` with `?` answer cells).
+- On-screen numeric keypad `key0`–`key9` in a 4x3 grid at the bottom.
+- No visible counters, timer, or progress indicator. Keypad fills `?` cells; focus/selection and completion unknown.
+
+## Runtime-verified rules — Addition Learn (E-RT-026)
+
+- Entry screen: four checkboxes for operand digit count ("3-5", "3", "4", "5") and a "Start" button.
+- Actual column-addition gameplay unobserved.
 
 ## Runtime-verified rules — Equations (Math Pieces variant) (E-RT-013 … E-RT-016)
 

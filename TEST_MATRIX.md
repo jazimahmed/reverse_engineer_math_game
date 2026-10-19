@@ -48,3 +48,17 @@ The APK is now installed and running; the rows above that say "Not run" describe
 | RT-EQ-BOARD | 5x5 crossword board (`58 + 87 = ?`, `18 - 8 = ?`), digit tray with 1-9/0/backspace/AD hint, countdown stopwatch | None | E-RT-013, E-RT-014 | Observed | Drag interaction not performed | High | Pending M4 |
 | RT-EQ-TUTORIAL | ▶ on the help overlay reveals a playable board, then the level ends by itself and the app returns to the level list | None | E-RT-015 | Observed 3x (no crash, no ANR) | Matches the static `completeEqTwo` → `gameOver()` mismatch path | High | Documented; parity requires reproducing the self-end |
 | RT-DATA-MISMATCH | Live board is 5x5; packaged `timerGameLevels` dataset is 56/72/90 cells (7x8/8x9/9x10) | Dataset parser + grid config (static mapping) | E-RT-016, E-APK-018 | Data compared | The packaged dataset belongs to a different variant | High | Dataset must not drive the Easy board |
+
+## Runtime-observed rows (2026-10-19/20 emulator runs)
+
+| Feature ID | Reference behavior (observed) | Implemented behavior | Evidence | Test result | Difference | Severity | Resolution |
+|---|---|---|---|---|---|---|---|
+| RT-MODESEL-VARIANT | Mode tiles vary per topic: Add/Sub 8 modes; Mul/Div 8 with Exam; Sqrt 6; Dec 4 cross-topic; Frac 6 cross-topic | None | E-RT-019 | Observed for all 7 topics | No implementation | High | Pending M4 |
+| RT-PRACTICE-SCORE-FULL | Green = first-try correct; red = retry count per question (not per wrong tap); multiple wrong taps don't increment red further | None | E-RT-020 | Observed with 3 wrong taps then correct | De-duplication confirmed | High | Pending M4 |
+| RT-QUIZ-MISSING-OP | Missing-operand format (`a + ? = r`), 4 options, same scoring | None | E-RT-023 | Observed | No implementation | High | Pending M4 |
+| RT-DUEL-SPLIT | Split screen, same question both halves, two chips (+1/-1), mirrors | None | E-RT-022 | Observed 6 bottom-only + 3 top-only rounds | No implementation | High | Pending M4 |
+| RT-TEST-TF | True/False on complete equation; wrong increments red immediately | None | E-RT-021 | Observed | No implementation | High | Pending M4 |
+| RT-TIME-AUTO | True/False with auto-advance ~4.5s/q; wrong increments red | None | E-RT-024 | Observed 3 auto-advances in 9s | No implementation | High | Pending M4 |
+| RT-PLAY-KEYPAD | 3 simultaneous equations, on-screen keypad 0-9, no counters/timer | None | E-RT-025 | Layout captured | Gameplay unknown | Medium | Pending M4 |
+| RT-LEARN-SETUP | Digit-count checkboxes + Start; gameplay unobserved | None | E-RT-026 | Entry captured | Gameplay unknown | Medium | Pending M4 |
+| RT-MODE-HARD | Hard mode tile present; not entered | None | — | Not observed | UNKNOWN | Medium | Pending M4 |

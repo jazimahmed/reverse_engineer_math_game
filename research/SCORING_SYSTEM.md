@@ -4,7 +4,7 @@ Runtime scoring behavior is UNKNOWN. Static result activities/adapters, leaderbo
 
 Still to observe per game: initial score, correct/incorrect effects, time bonuses or penalties, hint costs, star thresholds, score persistence, and result-screen contents.
 
-## Runtime-observed scoring — Addition Practice (E-RT-006)
+## Runtime-observed scoring — Addition Practice (E-RT-006, E-RT-020)
 
 **CONFIRMED** by controlled taps and counter read-outs:
 
@@ -14,9 +14,35 @@ Still to observe per game: initial score, correct/incorrect effects, time bonuse
 - A wrong tap has **no** immediate effect on either counter; the tapped option turns red with black text and stays marked, and the question does not advance (verified over 4 s with identical frames).
 - A correct first-try answer increments the green chip **immediately** and flashes the background green; the next question loads within ~0.9 s.
 - The result screen's "Correct" number equals the number of questions solved without a retry (a 10/10 first-try round showed Correct = 10, Wrong = 0).
+- **Multiple wrong taps on the same question do not further increment the red chip** — it increments exactly once per question when the correct answer is finally given after one or more wrong taps. This matches the static DEX finding that wrong attempts are de-duplicated per equation-container tag (E-APK-020).
 - Consequence for the reimplementation: "Wrong" on the result screen is a **retry count**, not an error count; a question may have had several wrong taps and still count once.
 
-UNKNOWN: whether a question can accumulate more than one red (only single-wrong-tap situations were observed), the exact threshold of the red chip, whether any other mode scores this way, and whether results persist per level.
+UNKNOWN: the exact threshold of the red chip, whether any other mode scores this way, and whether results persist per level.
+
+## Runtime-observed scoring — Addition Test (E-RT-021)
+
+- Green chip (`right1`) was **not observed to change** during the probe.
+- Red chip (`wrong1`) increments **immediately** on a wrong True/False tap and does not advance the question.
+- Multiple wrong taps on the same question do not further increment `wrong1`.
+- A correct tap advances to the next question.
+
+UNKNOWN: whether `right1` increments on correct first-try, the result screen mapping for this mode.
+
+## Runtime-observed scoring — Addition Time (E-RT-024)
+
+- Identical counter behavior to Test: `wrong1` increments immediately on wrong tap; auto-advance on timer expiry (behavior of auto-advance on counter unknown).
+
+UNKNOWN: scoring formula, whether `right1` increments.
+
+## Runtime-observed scoring — Addition Duel (E-RT-022)
+
+- Two chips: `right1` (bottom/player) and `right11` (top/opponent).
+- Correct tap on bottom increments `right11` (+1). Correct tap on top increments `right1` (+1).
+- Wrong tap on either half decrements the corresponding chip by -1.
+- Net score per half = correct - wrong. Both start at 0.
+- No visible round counter or result screen observed.
+
+UNKNOWN: win/loss condition, round duration, result screen.
 
 ## Math Pieces stars — static code evidence
 

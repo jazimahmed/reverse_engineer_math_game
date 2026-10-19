@@ -1,4 +1,4 @@
-# Runtime observations — live emulator sessions (M2)
+﻿# Runtime observations — live emulator sessions (M2)
 
 - Date: 2026-10-19 (OpenCode session; first successful execution of the target APK).
 - Device: Google Pixel 6 AVD (`sdk_gphone16k_x86_64`), Android 17, 1080x2400, headless (`-no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot`).
@@ -98,12 +98,76 @@ CONFIRMED layout (1080x2400):
 - CONFIRMED correction to the static model: the packaged asset `src/domain/data/mathPiecesLevels.json` (field `timerGameLevels`, 150 levels, level 1 = **56 cells** → 7x8 grid) does **not** describe the live Equations-Easy board (**5x5**). The extracted dataset therefore belongs to a different variant of this game (the "timer" variant), and the DEX class analysed earlier (`Game_MathPieces_Activity`) is not the class that runs in the Easy variant (`GameEquationsEasy`). Both variants remain to be mapped.
 - UNKNOWN: which entry point loads `timerGameLevels`; the drag/drop interaction itself (no successful drag was performed yet — a synthetic long-press gesture was consumed as a system back gesture, and the overlay blocked the second attempt); the answer-cell feedback styling; the star award path in this variant; what the AD hint does; what the header's empty panel shows.
 
-## 9. Behavioural summary that the reimplementation must reproduce
+## 9. Addition — other modes (Quiz, Duel, Play, Test, Time, Learn, Hard)
+
+### 9.1 Quiz (`.addition.AdditionGame2Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Quiz tile.
+- CONFIRMED layout: same header (qno, question, right1/wrong1) and question line (`n1` `sgn` `n2` `eql` `ans`), but `n2` shows `?` (missing operand).
+- CONFIRMED: four options `opt1`–`opt4` in a 2x2 grid.
+- CONFIRMED: **missing-operand questions** — the player must supply the second addend (e.g., `9 + ? = 19` → answer 10).
+- CONFIRMED counter behavior identical to Practice: wrong tap leaves counters unchanged, option turns red; correct answer after a wrong tap advances and increments red (retry counter).
+- CONFIRMED: 10-question round (qno = "N/10").
+
+### 9.2 Duel (`.addition.AdditionGame3Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Duel tile.
+- CONFIRMED: **split-screen layout** — top half rotated 180° (opponent's view), bottom half upright (local player).
+- CONFIRMED: both halves show the **same question simultaneously** (e.g., `6 + 5 = ?` on both halves).
+- CONFIRMED: four options per half (`opt1`–`opt4` top, `opt11`–`opt41` bottom).
+- CONFIRMED counter chips: `right1` (bottom/player) and `right11` (top/opponent). Both start at 0.
+- CONFIRMED scoring: a correct tap on the **bottom half** increments `right11` (the opponent chip!) by +1. A correct tap on the **top half** increments `right1` (the player chip) by +1. A wrong tap decrements the corresponding chip by -1.
+- INFERRED: the two halves share the same question and options; the "opponent" half is a mirror the player can also interact with; the two chips track net score per half (+1 correct, -1 wrong).
+- CONFIRMED: no visible round counter (qno shows "-").
+
+### 9.3 Play (`.addition.AdditionGame4Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Play tile.
+- CONFIRMED: **three equations displayed simultaneously** (three rows: `n1 sgn n2 eql ans` × 3), each with a `?` answer cell.
+- CONFIRMED: an **on-screen numeric keypad** (`key0`–`key9` in a 4x3 grid) at the bottom for entering answers.
+- CONFIRMED: tapping a keypad digit fills the currently focused `?` cell (focus mechanics unobserved).
+- UNKNOWN: whether there is a timer, how answers are submitted, what constitutes completion, scoring, or stars.
+
+### 9.4 Test (`.addition.AdditionGame5Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Test tile.
+- CONFIRMED layout: standard header + question line with **complete equation** (`9 + 5 = 17`), and **two large True/False buttons** (`opt11`=True, `opt21`=False).
+- CONFIRMED: the player judges whether the displayed equation is correct (True) or incorrect (False).
+- CONFIRMED counter behavior: wrong tap increments `wrong1` immediately; the question does not advance. Correct tap advances and does not change `wrong1`.
+- CONFIRMED: 10-question round (qno = "N/10").
+- UNKNOWN: whether the same equation can be judged multiple times, the exact scoring formula, time limit.
+
+### 9.5 Time (`.addition.AdditionGame6Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Time tile.
+- CONFIRMED layout: identical to Test — full equation + True/False buttons.
+- CONFIRMED: **countdown timer** — the `qno` increments automatically every ~4–5 s without player input (observed: qno=1 → 2 → 3 in ~9 s).
+- CONFIRMED counter behavior: same as Test — wrong tap increments `wrong1`, correct tap advances.
+- UNKNOWN: total round duration, whether the timer pauses on wrong tap, end-of-round behavior, scoring.
+
+### 9.6 Learn (`.addition.AdditionGame7Activity`)
+
+- CONFIRMED: entry from Addition mode-select → Learn tile.
+- CONFIRMED: **column-addition setup screen** — four checkboxes for digit count ("3-5", "3", "4", "5") and a "Start" button.
+- UNKNOWN: the actual column-addition gameplay, keypad, carry handling, number of problems, scoring.
+
+### 9.7 Hard (`.addition.AdditionGame8Activity` / `AdditionGame9Activity`)
+
+- NOT YET ENTERED: the mode-select shows "Hard" at the bottom; tapping it did not transition before the app was left in Learn.
+- UNKNOWN: rules, layout, difficulty, scoring.
+
+## 11. Behavioural summary that the reimplementation must reproduce
 
 1. Boot: splash (GA STUDIOS + v14.2) → main menu.
 2. Main menu: 4 utility buttons + 8 topic tiles (games hub lives behind the gamepad tile).
-3. Topic screen: 8 mode tiles.
-4. Practice: 10 questions, 4 options, first-try-correct scoring, wrong-answer lock on the option, red counter for retries, green flash on correct, orange background for the last question.
-5. Result: Score screen with Correct/Wrong, review sheet, RESTART/EXIT (EXIT → topic screen).
-6. Settings: Music, Sound, Night; persisted.
-7. Equations: level list → 5x5 crossword board with tray, countdown timer, tutorial overlay that ends the level.
+3. Topic screen: **mode sets vary per topic** (Addition/Subtraction = 8 modes including Practice/Quiz/Duel/Play/Test/Time/Learn/Hard; Multiply/Division = 9 modes with Learn/Exam/Practice/Quiz/Duel/Play/Test/Time; Square Root = 6 modes with Learn/Play/Practice; Decimal = 4 modes with Addition/Subtract/Duel/Play; Fraction = 6 modes with Addition/Subtract/Multiply/Division/Hard/Play).
+4. Addition → Practice: 10 questions, 4 options, first-try-correct scoring, wrong-answer lock on the option, red counter for retries, green flash on correct, orange background for the last question.
+5. Addition → Quiz: 10 questions, missing-operand format (`a + ? = r`), 4 options, same scoring.
+6. Addition → Duel: split screen (180° rotated opponent half), same question on both halves, two score chips (+1/-1 per half), 4 options each.
+7. Addition → Play: 3 simultaneous equations, on-screen keypad (0-9), completion/scoring unknown.
+8. Addition → Test: 10 True/False questions (judge displayed equation), same counter semantics.
+9. Addition → Time: True/False with auto-advance countdown (~4-5 s/question), same counter semantics.
+10. Addition → Learn: column-addition setup (digit count checkboxes), gameplay unobserved.
+11. Result: Score screen with Correct/Wrong, review sheet, RESTART/EXIT (EXIT → topic screen).
+12. Settings: Music, Sound, Night; persisted across force-stop+relaunch.
+13. Equations: level list → 5x5 crossword board with tray, countdown timer, tutorial overlay that ends the level.

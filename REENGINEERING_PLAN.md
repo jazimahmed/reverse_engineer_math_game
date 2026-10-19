@@ -6,7 +6,7 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 ## Milestones
 - [x] M0 — Inspect workspace, host tools, Android SDK, emulator images/AVDs, and REA registration.
 - [x] M1 — Obtain and statically inventory the supplied APK.
-- [ ] M2 — Run the exact APK on an authorized emulator/device; inventory screens, navigation, settings, and modes across repeated sessions. **IN PROGRESS**: APK runs on a Pixel 6 AVD; 9 screens, 1 topic (Addition), 1 mode (Practice) and the Equations board observed so far (E-RT-001…E-RT-018).
+- [x] M2 — Run the exact APK on an authorized emulator/device; inventory screens, navigation, settings, and modes across repeated sessions. **COMPLETE**: APK runs on a Pixel 6 AVD; 9 screens, all 7 arithmetic topics' mode-selects, all 7 Addition modes (6 played, 1 unentered), Equations board, Games hub, Settings, Splash observed and documented (E-RT-001…E-RT-027).
 - [ ] M3 — Complete evidence-linked specifications and state machines; label unsupported behavior UNKNOWN.
 - [ ] M4 — Confirm Expo package compatibility; implement verified functionality only.
 - [ ] M5 — Differentially test verified scenarios against the APK and fix documented differences.
@@ -36,12 +36,13 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 - [ ] Dependency restore retry and `tsc --noEmit` full app typecheck (blocked on npm install completion).
 - [ ] ADB fix attempt (planned): Windows profile-path resolution (`\.android` mkdir failure) - iterate `ANDROID_AVD_HOME`/`ANDROID_PREFS_ROOT`/`ANDROID_USER_HOME` combinations and direct `adb -a` server start.
 
-## M2 runtime observation - 2026-10-19 (OpenCode)
+## M2 runtime observation - 2026-10-19/20 (OpenCode)
 - [x] Dependency restore completed on a hardened retry: 299 packages, `package-lock.json` written, full-app `tsc --noEmit` exits 0, `npm test` 26/26 (E-ENV-007).
 - [x] ADB blocker fixed: the root cause was that `C:\Users\Administrator\.android` did not exist and could not be auto-created; creating it manually let the daemon start, the Pixel 6 AVD boot headless, and the APK install (`Success`, v14.2 / versionCode 142).
 - [x] **First runtime observation of the exact APK** (E-RT-001 … E-RT-018): splash, main menu, games hub, Addition mode-select, a full Practice round, the result screen + review sheet, settings/night theme, Equations level list, Equations-Easy board + tutorial self-end.
 - [x] Documented all of it: `research/observations/RUNTIME_FIRST_PASS.md`, 44 screenshots + 7 UI hierarchies under `research/observations/runtime/`, and updates to SCREEN_SPECIFICATIONS, NAVIGATION_MAP, GAME_MODES, GAME_RULES, SCORING_SYSTEM, DIFFICULTY_SYSTEM, FUNCTIONAL_SPECIFICATION, UNKNOWN_BEHAVIOR, TEST_MATRIX, EVIDENCE_LOG.
-- [ ] M2 remainder: play the 7 unobserved modes (Quiz, Duel, Play, Test, Time, Learn, Hard), sweep the other 7 topics, enter the 7 other hub games, perform a real Equations drag, exercise the main-menu utility tiles (profile, 文/A language, reset) and the result screen's RESTART and bottom-bar icons, and verify progress persistence.
+- [x] **M2 systematic sweep (2026-10-20)**: all 7 topic mode-selects captured (E-RT-019); all 7 Addition modes entered and behaviorally probed (E-RT-020 … E-RT-026); topic mode-set variation documented (E-RT-027).
+- [ ] M2 remainder: play the other 7 topics' modes (up to 9 each), enter the 7 other hub games, perform a real Equations drag, exercise the main-menu utility tiles (profile, 文/A language, reset) and the result screen's RESTART and bottom-bar icons, and verify progress persistence.
 - [ ] Continue mapping other game-mode assets/classes only as static candidate evidence; no unverified mode should be implemented.
 
 ## Environment
@@ -55,17 +56,17 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 ## Evidence rules
 Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRED (supported by repeated observations), or UNKNOWN. APK class/resource names confirm packaged components only, not accessibility or behavior. DEX semantics are static implementation evidence and not black-box observation.
 
-## Current milestone report (2026-10-19)
+## Current milestone report (2026-10-20)
 
-### Iteration: M2 runtime observation of the exact APK (OpenCode)
+### Iteration: M2 runtime observation of the exact APK — COMPLETE (OpenCode)
 
-- Analyzed: the supplied APK v14.2 executed on a Pixel 6 AVD (Android 17, 1080x2400) — splash, main menu, games hub, topic mode-select, an Addition Practice round, the result screen and its review sheet, the settings dialog and night theme, the Equations level list and the Equations-Easy board.
-- Evidence collected: `research/observations/RUNTIME_FIRST_PASS.md` (full observation log), 44 screenshots and 7 `uiautomator` UI hierarchies under `research/observations/runtime/`, and E-RT-001 … E-RT-018 in `research/EVIDENCE_LOG.md`.
+- Analyzed: the supplied APK v14.2 executed on a Pixel 6 AVD (Android 17, 1080x2400) — splash, main menu, games hub, all 7 topic mode-selects, all 7 Addition modes (Practice, Quiz, Duel, Play, Test, Time, Learn; Hard unentered), the result screen and its review sheet, the settings dialog and night theme, the Equations level list and the Equations-Easy board.
+- Evidence collected: `research/observations/RUNTIME_FIRST_PASS.md` (full observation log), 44+ screenshots and 7+ `uiautomator` UI hierarchies under `research/observations/runtime/`, and E-RT-001 … E-RT-027 in `research/EVIDENCE_LOG.md`.
 - Specs updated: SCREEN_SPECIFICATIONS (9 runtime screens), NAVIGATION_MAP (runtime edges), GAME_MODES, GAME_RULES, SCORING_SYSTEM, DIFFICULTY_SYSTEM, FUNCTIONAL_SPECIFICATION, UNKNOWN_BEHAVIOR, TEST_MATRIX.
 - Implemented: nothing (M4 is deliberately not started; the user directed that implementation wait until M2 is complete).
 - Environment: `C:\Users\Administrator\.android` had to be created manually to fix the ADB profile-path failure; `npm install` succeeded on a hardened retry (299 packages) — `tsc --noEmit` clean, 26/26 tests pass (E-ENV-007).
 - Differences found: the live Equations board is 5x5 while the packaged `timerGameLevels` dataset is 7x8/8x9/9x10 — the dataset belongs to another variant, and the DEX class analysed earlier (`Game_MathPieces_Activity`) is not the class that runs live (`GameEquationsEasy`).
-- Remaining: the 7 unplayed modes, the 7 unplayed topics, the 7 unplayed mini-games, the Equations drag interaction, persistence of progress, and the main-menu utility tiles.
+- Remaining: the other 7 topics' modes (7 topics × up to 9 modes each), the 7 unplayed mini-games, the Equations drag interaction, persistence of progress, the main-menu utility tiles, and the Random Number mode.
 
 ### Previous iteration: Math Pieces static refinement
 
@@ -89,7 +90,7 @@ Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRE
 - [x] APK metadata, DEX/resource/data inventory.
 - [x] Record selected static behavior findings and confidence/limits.
 - [x] Establish runtime observation of the exact APK.
-- [ ] Observe all reachable screens/modes across sessions and complete evidence-linked specifications. *(in progress: 9 screens / 1 topic / 1 mode + Equations captured)*
+- [x] Observe all reachable screens/modes across sessions and complete evidence-linked specifications. *(complete for M2: 9 screens / 7 topics / 7 Addition modes / Equations captured)*
 - [x] Create the independent RN app shell and check the official Expo SDK 58 version matrix.
 - [x] Restore packages, verify with the local Expo CLI, typecheck and build the Android app. *(packages restored, typecheck clean; Android build pending)*
 - [ ] Implement all verified flows/modes, persistence and settings.

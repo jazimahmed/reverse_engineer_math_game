@@ -1,11 +1,11 @@
 # Unknown behavior
 
-The target is `research/apk/Math-Games-v14-2-[Premium]-modyolo.apk`. **The APK is now installed and running on an emulator** (2026-10-19), so runtime observations exist; see `research/observations/RUNTIME_FIRST_PASS.md` and E-RT-001…E-RT-018 in `EVIDENCE_LOG.md`. The remaining unknowns below are what the runtime pass has *not* yet covered.
+The target is `research/apk/Math-Games-v14-2-[Premium]-modyolo.apk`. **The APK is now installed and running on an emulator** (2026-10-19/20), so runtime observations exist; see `research/observations/RUNTIME_FIRST_PASS.md` and E-RT-001…E-RT-027 in `EVIDENCE_LOG.md`. The remaining unknowns below are what the runtime pass has *not* yet covered.
 
 Highest-priority unknowns:
 
-1. **The other 7 modes** of every topic (Quiz, Duel, Play, Test, Time, Learn, Hard) — only **Practice** has been played. Mode-specific rules, timers, scoring and end conditions are entirely unknown.
-2. **The other 7 topics** (Subtract, Multiply, Divide, Square root, Decimals, Fractions, Mixed/gamepad) — only Addition's mode-select has been seen; the mode list may differ per topic, and the nine numbered `*Game1..9Activity` tiers per topic are unexplored (operand ranges, difficulty progression).
+1. **The 5 unplayed Addition modes** (Play, Learn, Hard, plus full Duel/Quiz/Test/Time end-to-end) — Play's keypad/completion, Learn's column-addition gameplay, Hard's rules, Duel's win condition, Test/Time result screens and scoring are unknown.
+2. **The other 7 topics' modes** (Subtract, Multiply, Divide, Square root, Decimals, Fractions) — mode labels are confirmed (E-RT-019) but no gameplay has been observed. The nine numbered `*Game1..9Activity` tiers per topic are unexplored (operand ranges, difficulty progression).
 3. **The 7 other mini-games** in the hub (2048, Fifteen, Puzzle, Match, Sudoku, Mix, Memory) — tile presence is confirmed, behavior is not.
 4. **Equations board interaction** — no successful drag has been performed; answer-cell fill/backspace, row/column feedback colouring, star award, the AD hint, the countdown duration and the empty header panel are all unknown. The level also self-ends after the tutorial, so the intended play loop is still unobserved.
 5. **Result screen details** — the three bottom-bar icons (thumbs-up / refresh / pink), how wrong answers render in the review sheet, RESTART behavior, per-level persistence.

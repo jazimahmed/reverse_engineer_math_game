@@ -376,3 +376,56 @@ A user-provided APK or an authorized, working reference device/emulator session 
 - Result: `npm install` with hardened fetch settings completed after the first attempt died on `read ECONNRESET` during unpacking (registry reachable, HTTP 200 on `/expo`; no proxy configured). 299 top-level packages installed and `package-lock.json` written; `tsc --noEmit` over the whole project exits 0 with the project's own TypeScript; `npm test` passes 26/26.
 - Limit: `npm audit` reports vulnerabilities in the Expo dependency tree; not yet triaged (dependency-version decisions belong to M4).
 
+## E-RT-019 — Topic mode-select screens for all 8 topics (2026-10-20)
+- Confidence: CONFIRMED for Addition, Subtraction, Multiplication, Division, Square Root, Decimal, Fraction; UNKNOWN for Games (hub entry).
+- Evidence: `runtime/m2-topic-*.png`, `runtime/ui/m2-topic-*.xml`.
+- Result: each topic opens its own `*Activity` (AdditionActivity, SubtractionActivity, MultiplicationActivity, DivisionActivity, ExponentialActivity, DecimalActivity, FractionActivity). The mode tiles and their labels differ per topic:
+  - **Addition**: Practice, Quiz, Duel, Play, Test, Time, Learn, Hard (8 modes)
+  - **Subtraction**: identical 8 modes as Addition
+  - **Multiplication**: Learn, Exam, Practice, Quiz, Duel, Play, Test, Time (8 modes, different order, "Exam" replaces "Hard")
+  - **Division**: identical 8 modes as Multiplication
+  - **Square Root (Exponential)**: Learn, Play², Practice² (6 modes, labels show superscript "²" artifacts)
+  - **Decimal**: Addition, Subtract, Duel, Play (4 modes — cross-topic modes!)
+  - **Fraction**: Addition, Subtract, Multiply, Division, Hard, Play (6 modes — cross-topic modes!)
+- Implication: the mode list is **topic-specific**, not a universal 8-mode grid. Decimal and Fraction reuse other topics' names.
+
+## E-RT-020 — Addition Practice counter semantics (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-probe-addition-practice-*`, `runtime/m2-counter-addition-practice-*`.
+- Result: green chip (`right1`) = first-try correct answers only; red chip (`wrong1`) = questions that required a retry. Multiple wrong taps on the same question do **not** increment `wrong1` further — it increments once per question when the correct answer is finally given. A question answered correctly on the first try increments green only. This matches the static DEX finding that wrong attempts are de-duplicated per equation-container tag (E-APK-020).
+
+## E-RT-021 — Addition Test mode True/False semantics (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-probe-addition-test-*`, `runtime/m2-counter-addition-test-*`.
+- Result: full equation displayed (e.g., `2 + 5 = 12`), player taps True or False. Wrong tap increments `wrong1` immediately (red counter) and does not advance. Correct tap advances to next question. Multiple wrong taps on the same question do not further increment `wrong1`. Green counter (`right1`) not observed to change in this mode.
+
+## E-RT-022 — Addition Duel mode split-screen scoring (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-probe-addition-duel-*`, `runtime/m2-duel2-*`.
+- Result: two halves showing the **same question simultaneously** (top rotated 180°, bottom upright). Four options per half (`opt1`–`opt4` top, `opt11`–`opt41` bottom). Two score chips: `right1` (bottom), `right11` (top). Correct tap on bottom increments `right11`; correct tap on top increments `right1`. Wrong tap decrements the corresponding chip by -1. Chips start at 0. The two halves are mirrors — the "opponent" is a simultaneous view the player can interact with.
+
+## E-RT-023 — Addition Quiz mode missing-operand format (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-probe-addition-quiz-*`.
+- Result: equation shows `n1 sgn n2(?) eql ans` with `n2` = "?" (e.g., `9 + ? = 19`). Player selects the missing operand from four options. Same counter semantics as Practice.
+
+## E-RT-024 — Addition Time mode auto-advance countdown (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-time-*`.
+- Result: same layout as Test (True/False), but `qno` increments automatically every ~4.5 s without player input. Wrong tap increments `wrong1` immediately; correct tap advances. The timer appears to be a per-question deadline with auto-advance.
+
+## E-RT-025 — Addition Play mode simultaneous equations + keypad (2026-10-20)
+- Confidence: CONFIRMED layout; UNKNOWN gameplay.
+- Evidence: `runtime/m2-probe-addition-play-*`.
+- Result: three equations displayed simultaneously (`n1`/`n11`/`n12` etc.), each with a `?` answer cell. Bottom shows an on-screen keypad `key0`–`key9` in a 4x3 grid. No visible counters or timer. The keypad fills `?` cells; focus/selection mechanics and submission/completion unknown.
+
+## E-RT-026 — Addition Learn mode setup screen (2026-10-20)
+- Confidence: CONFIRMED entry; UNKNOWN gameplay.
+- Evidence: `runtime/m2-probe-addition-learn-*`.
+- Result: four checkboxes for operand digit count ("3-5", "3", "4", "5") and a "Start" button. Actual column-addition gameplay not observed.
+
+## E-RT-027 — Topic mode-set variation (2026-10-20)
+- Confidence: CONFIRMED.
+- Evidence: `runtime/m2-topic-*.xml`.
+- Result: the mode list is **not universal**. Addition/Subtraction share 8 modes; Multiply/Division share 8 modes with "Exam" instead of "Hard"; Square Root has 6 modes; Decimal has 4 cross-topic modes (Addition, Subtract, Duel, Play); Fraction has 6 cross-topic modes (Addition, Subtract, Multiply, Division, Hard, Play). The "Games" (gamepad) tile is a separate entry to the Games hub, not an arithmetic topic.
+

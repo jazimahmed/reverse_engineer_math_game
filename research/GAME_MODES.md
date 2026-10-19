@@ -16,19 +16,32 @@ The following are component families in the supplied APK's DEX/layout resources.
 
 No mode has been behaviorally verified. The current Play listing for this package is not sufficient to establish behavior for this supplied v14.2 artifact.
 
-## Runtime-observed modes (2026-10-19 emulator run)
+## Runtime-observed modes (2026-10-19/20 emulator runs)
 
 | Mode | How it is reached | Observed behavior | Confidence |
 |---|---|---|---|
-| **Topic mode-select** | Main menu → topic tile | 8 mode tiles: Practice, Quiz, Duel, Play, Test, Time, Learn, Hard. Observed for Addition only. | CONFIRMED (E-RT-004) |
-| **Practice** | Mode-select → Practice | 10-question round, 4 options in a 2x2 grid, first-try-correct green counter, red counter for questions needing a retry, green flash on correct, orange background on the 10/10 question, result screen with Score/Correct/Wrong plus a per-question review sheet. | CONFIRMED (E-RT-005 … E-RT-010) |
-| **Quiz / Duel / Play / Test / Time / Learn / Hard** | Mode-select → tile | Not yet entered. | UNKNOWN |
-| **Equations (Math Pieces variant)** | Main menu → gamepad → Games hub → Equations → level 1 | 4-column level list (level 1 unlocked, rest padlocked) → 5x5 crossword board `58 + 87 = ?` / `18 - 8 = ?` with a digit tray, a countdown stopwatch and a tutorial overlay whose ▶ ends the level. | CONFIRMED (E-RT-012 … E-RT-015) |
-| **2048 / Fifteen / Puzzle / Match / Sudoku / Mix / Memory** | Games hub → tile | Tiles confirmed present; not entered. | UNKNOWN (E-RT-003) |
-| **Leaderboards** | Games hub → crown | Opens Google Sign-In; the leaderboard screen itself is unobserved. | UNKNOWN (E-RT-003) |
+| **Topic mode-select** | Main menu → topic tile | Mode tiles and labels **vary per topic** (see below). Observed for all 7 arithmetic topics. | CONFIRMED (E-RT-019) |
+| **Addition modes** | Addition mode-select | | |
+| — Practice | Mode-select → Practice | 10 questions, 4 options (2x2), first-try-correct = green chip, retry = red chip, green flash, orange on Q10. | CONFIRMED (E-RT-020) |
+| — Quiz | Mode-select → Quiz | 10 questions, **missing-operand** (`a + ? = r`), 4 options, same scoring. | CONFIRMED (E-RT-023) |
+| — Duel | Mode-select → Duel | Split screen (180° rotated), same question both halves, two chips (+1/-1), 4 options each. | CONFIRMED (E-RT-022) |
+| — Play | Mode-select → Play | 3 simultaneous equations, on-screen keypad 0-9, completion/scoring UNKNOWN. | CONFIRMED layout (E-RT-025) |
+| — Test | Mode-select → Test | 10 True/False (judge shown equation), wrong increments red immediately. | CONFIRMED (E-RT-021) |
+| — Time | Mode-select → Time | True/False with **auto-advance countdown** (~4.5 s/q), wrong increments red. | CONFIRMED (E-RT-024) |
+| — Learn | Mode-select → Learn | Setup screen: 4 digit-count checkboxes + Start; gameplay unobserved. | CONFIRMED entry (E-RT-026) |
+| — Hard | Mode-select → Hard | Not entered. | UNKNOWN |
+| **Subtraction modes** | Subtraction mode-select | Same 8 labels as Addition; not played. | CONFIRMED labels (E-RT-019) |
+| **Multiplication modes** | Multiplication mode-select | Learn, Exam, Practice, Quiz, Duel, Play, Test, Time (8, "Exam" replaces "Hard"); not played. | CONFIRMED labels (E-RT-019) |
+| **Division modes** | Division mode-select | Same 8 as Multiplication; not played. | CONFIRMED labels (E-RT-019) |
+| **Square Root modes** | Exponential mode-select | Learn, Play², Practice² (6 modes); not played. | CONFIRMED labels (E-RT-019) |
+| **Decimal modes** | Decimal mode-select | **Cross-topic**: Addition, Subtract, Duel, Play (4 modes); not played. | CONFIRMED labels (E-RT-019) |
+| **Fraction modes** | Fraction mode-select | **Cross-topic**: Addition, Subtract, Multiply, Division, Hard, Play (6 modes); not played. | CONFIRMED labels (E-RT-019) |
+| **Equations (Math Pieces variant)** | Games hub → Equations → level 1 | 4-column level list → 5x5 crossword board, digit tray, countdown, tutorial overlay ends level. | CONFIRMED (E-RT-012 … E-RT-015) |
+| **2048 / Fifteen / Puzzle / Match / Sudoku / Mix / Memory** | Games hub → tile | Tiles present; not entered. | UNKNOWN (E-RT-003) |
+| **Leaderboards** | Games hub → crown | Opens Google Sign-In; leaderboard unobserved. | UNKNOWN (E-RT-003) |
 | **Random Number** | unknown entry | Not reachable from any observed screen. | UNKNOWN |
 
-The mode list is therefore CONFIRMED to contain 8 topic modes per topic, but only **Practice** and **Equations** have been played. Every other mode remains UNKNOWN.
+The mode list is **topic-specific**, not a universal 8-mode grid. Only Addition modes have been played. Every other topic's modes remain UNKNOWN.
 
 ### Math Pieces static refinement
 
