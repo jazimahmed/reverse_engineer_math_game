@@ -4,7 +4,7 @@
 import React from 'react';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RouteProp } from "@react-navigation/native";
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { Colors } from '../constants/colors';
@@ -27,6 +27,13 @@ const TOPIC_ICONS: Record<TopicId, string> = {
   games: '🎮',
 };
 
+interface TopicItem {
+  id: TopicId;
+  title: string;
+  icon: string;
+  color: string;
+}
+
 export function MainMenuScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const night = useSettingsStore((s) => s.night);
@@ -46,6 +53,32 @@ export function MainMenuScreen() {
     }
   };
 
+  const topicItems: TopicItem[] = TOPICS.map((topicId) => {
+    const config = TopicConfig[topicId];
+    const tileColor = colors[topicId] || colors.addition;
+    return {
+      id: topicId,
+      title: config.title,
+      icon: TOPIC_ICONS[topicId],
+      color: tileColor,
+    };
+  });
+
+  const renderItem = ({ item }: { item: TopicItem }) => (
+    <TouchableOpacity
+      style={[styles.topicTile, { backgroundColor: item.color }]}
+      onPress={() => handleTopicPress(item.id)}
+      activeOpacity={0.8}
+    >
+      <Text style={[styles.topicIcon, { color: night ? colors.nightText : '#FFFFFF' }]}>
+        {item.icon}
+      </Text>
+      <Text style={[styles.topicLabel, { color: night ? colors.nightText : '#FFFFFF' }]}>
+        {item.title}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.utilityBar, { backgroundColor: colors.background }]}>
@@ -63,27 +96,14 @@ export function MainMenuScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.gridContainer, { backgroundColor: colors.background }]}>
-        {TOPICS.map((topicId) => {
-          const config = TopicConfig[topicId];
-          const tileColor = colors[topicId] || colors.addition;
-          return (
-            <TouchableOpacity
-              key={topicId}
-              style={[styles.topicTile, { backgroundColor: tileColor }]}
-              onPress={() => handleTopicPress(topicId)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.topicIcon, { color: night ? colors.nightText : '#FFFFFF' }]}>
-                {TOPIC_ICONS[topicId]}
-              </Text>
-              <Text style={[styles.topicLabel, { color: night ? colors.nightText : '#FFFFFF' }]}>
-                {config.title}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <FlatList
+        data={topicItems}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        contentContainerStyle={[styles.gridContainer, { backgroundColor: colors.background, flex: 1 }]}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
@@ -102,14 +122,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   utilityIcon: { fontSize: 28 },
-  gridContainer: { flex: 1, padding: 16 },
+  gridContainer: { padding: 16 },
   topicTile: {
-    flex: 1,
+    width: '48%',
     aspectRatio: 1,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: 8,
+    margin: '1%',
+    padding: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -119,4 +140,3 @@ const styles = StyleSheet.create({
   topicIcon: { fontSize: 48, marginBottom: 8 },
   topicLabel: { fontSize: 18, fontWeight: '600' },
 });
-
