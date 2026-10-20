@@ -62,3 +62,20 @@ The APK is now installed and running; the rows above that say "Not run" describe
 | RT-PLAY-KEYPAD | 3 simultaneous equations, on-screen keypad 0-9, no counters/timer | None | E-RT-025 | Layout captured | Gameplay unknown | Medium | Pending M4 |
 | RT-LEARN-SETUP | Digit-count checkboxes + Start; gameplay unobserved | None | E-RT-026 | Entry captured | Gameplay unknown | Medium | Pending M4 |
 | RT-MODE-HARD | Hard mode tile present; not entered | None | — | Not observed | UNKNOWN | Medium | Pending M4 |
+
+## Specification rows (M3 — evidence-linked specs written)
+
+| Feature ID | Reference behavior (observed) | Spec document | Evidence | Status | UNKNOWNs noted |
+|---|---|---|---|---|---|
+| SPEC-ADD-PRACTICE | 10Q, 4opt, first-try green, retry red, de-duplicated wrong | `SPEC_ADDITION_PRACTICE.md` | E-RT-005..007,020 | Written | Pencil, gear, sound, gen algo |
+| SPEC-ADD-QUIZ | Missing-operand, 4opt, same scoring | `SPEC_ADDITION_QUIZ.md` | E-RT-023 | Written | Operand ranges, higher tiers |
+| SPEC-ADD-DUEL | Split screen, cross-increment chips, mirror | `SPEC_ADDITION_DUEL.md` | E-RT-022 | Written | Win condition, network, tiers |
+| SPEC-ADD-TEST | True/False on full eq, wrong→red immediate | `SPEC_ADDITION_TEST.md` | E-RT-021 | Written | right1 behavior, result screen |
+| SPEC-ADD-TIME | True/False + auto-advance 4.5s/q | `SPEC_ADDITION_TIME.md` | E-RT-024 | Written | Total duration, pause, scoring |
+| SPEC-ADD-PLAY | 3 eq + keypad | `SPEC_ADDITION_PLAY.md` | E-RT-025 | Written | **All gameplay UNKNOWN** |
+| SPEC-ADD-LEARN | Digit-count checkboxes + Start | `SPEC_ADDITION_LEARN.md` | E-RT-026 | Written | **All gameplay UNKNOWN** |
+| SPEC-EQUATIONS | 5×5 crossword, tray, countdown, overlay self-end | `SPEC_EQUATIONS.md` | E-RT-013..016 | Written | Drag, validation, stars, timer, AD |
+| SPEC-SETTINGS | Music/Sound/Night toggles, Night persists | `SPEC_SETTINGS.md` | E-RT-011 | Written | Music/Sound persist, footer icons |
+| SPEC-NAVIGATION | Full back-stack, topic-specific mode sets | `SPEC_NAVIGATION.md` | E-RT-001..010,019 | Written | Profile, lang, reset, deep links |
+| SPEC-PERSISTENCE | Night mode SharedPreferences, level unlock | `SPEC_PERSISTENCE.md` | E-RT-011,012,019 | Written | Scores, reset, schema, migration |
+| STATE-MACHINES | Complete ASCII machines for all observed modes | `STATE_MACHINES.md` | All E-RT | Written | Explicit UNKNOWN labels per transition |

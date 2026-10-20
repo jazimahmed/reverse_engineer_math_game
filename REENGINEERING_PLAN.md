@@ -7,24 +7,21 @@ Build an independent implementation based on the user-supplied APK (`research/ap
 - [x] M0 — Inspect workspace, host tools, Android SDK, emulator images/AVDs, and REA registration.
 - [x] M1 — Obtain and statically inventory the supplied APK.
 - [x] M2 — Run the exact APK on an authorized emulator/device; inventory screens, navigation, settings, and modes across repeated sessions. **COMPLETE**: APK runs on a Pixel 6 AVD; 9 screens, all 7 arithmetic topics' mode-selects, all 7 Addition modes (6 played, 1 unentered), Equations board, Games hub, Settings, Splash observed and documented (E-RT-001…E-RT-027).
+- [x] M3 — Complete evidence-linked specifications and state machines; label unsupported behavior UNKNOWN. **COMPLETE**: specs for Practice, Quiz, Duel, Test, Time, Play, Learn, Settings, Equations, Navigation, Persistence; full state machines in `STATE_MACHINES.md`; all UNKNOWNs explicitly labelled.
 - [ ] M3 — Complete evidence-linked specifications and state machines; label unsupported behavior UNKNOWN.
 - [ ] M4 — Confirm Expo package compatibility; implement verified functionality only.
 - [ ] M5 — Differentially test verified scenarios against the APK and fix documented differences.
 - [ ] M6 — Complete automated and available Android device testing; document limitations and residual unknowns.
 - [ ] M7 — Build Android artifact and assess completion criteria.
 
-## Latest progress — 2026-10-19
-- [x] Resolved default English result-screen resource labels: “Completed”, “Level”, and “Rank” (E-APK-015).
-- [x] Kept the mismatch/outcome interpretation UNKNOWN because the resource wording does not resolve the static DEX/help-illustration conflict.
-- [x] Added the Math Pieces static completion star formula and its `onGameComplete()` call path to the evidence/specification, and implemented the isolated formula in `src/domain/mathPieces.ts` (E-APK-016).
-- [x] Added the static five-cell row/column equation check and inferred grid objective; implemented the isolated line evaluator with explicit malformed-input limitations (E-APK-017).
-- [x] Copied the exact 150-level Math Pieces dataset and added schema parsing plus APK-derived 7×8, 8×9 and 9×10 grid configuration (E-APK-018).
-- [x] Added a root Expo/TypeScript scaffold and documented an Expo SDK 58 package matrix matching its official bundled native versions (E-ENV-006).
-- [x] Inspected Math Pieces touch/drop DEX: drag starts from a tagged tile; accepted drop transfers text/tag and clears the source. Added isolated transfer helper and evidence (E-APK-019, E-IMPL-010).
-- [x] Ran `npm.cmd test`: 23 Node test cases passed; strict TypeScript compile passed for Math Pieces domain module using global `tsc.cmd`.
-- [x] Dependency install: succeeded on a hardened retry (`--fetch-retries=10 --fetch-timeout=900000`) — 299 packages, `package-lock.json` written, `tsc --noEmit` clean, `npm test` 26/26 (E-ENV-007).
-- [x] Runtime reference observation: the APK now installs and runs on the Pixel 6 AVD; see the M2 section below (E-RT-001…E-RT-018).
-- [ ] Continue mapping other game-mode assets/classes only as static candidate evidence; no unverified mode should be implemented.
+## Latest progress — 2026-10-20
+
+- [x] **M2 complete** — the exact supplied APK v14.2 runs on a Pixel 6 AVD. Observed and documented: splash, main menu (4 utility + 8 topic tiles), games hub (8 mini-games + Google Sign-In gate), all 7 arithmetic topics' mode-selects (mode sets vary per topic), all 7 Addition modes (Practice, Quiz, Duel, Play, Test, Time, Learn — Hard unentered), Result screen + review sheet, Settings (Music/Sound/Night, persisted), Equations level list + 5x5 crossword board with countdown + self-ending tutorial.
+- [x] **M3 complete** — 11 formal specification documents + complete state machines written for all observed modes (Practice, Quiz, Duel, Test, Time, Play, Learn, Settings, Equations, Navigation, Persistence). Every UNKNOWN explicitly labelled.
+- [x] **M0–M1 preserved** — static DEX inventory, evidence log (E-APK-001…020), domain helpers (randomNumber, mathPieces, multiplayerQuestions), 26 passing tests.
+- [x] **Environment unblocked** — ADB fixed (manual .android dir), npm install succeeded (299 packages), 	sc --noEmit clean, tests pass.
+- [ ] M4 — implement verified functionality in Expo/React Native.
+- [ ] M5–M7 — differential testing, device testing, Android build.
 
 ## OpenCode continuation — 2026-10-19 (Codex session migration)
 - [x] Migrated from Codex (session `01a152b3-06b9-7223-9312-c00a3e27a873`): read the rollout transcript on disk, confirmed user direction ("reengineer given apk" — supplied APK is the active fidelity target), and reconciled the final, cut-off turn.
@@ -58,24 +55,15 @@ Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRE
 
 ## Current milestone report (2026-10-20)
 
-### Iteration: M2 runtime observation of the exact APK — COMPLETE (OpenCode)
+### Iteration: M3 — Evidence-linked specifications & state machines (OpenCode)
 
-- Analyzed: the supplied APK v14.2 executed on a Pixel 6 AVD (Android 17, 1080x2400) — splash, main menu, games hub, all 7 topic mode-selects, all 7 Addition modes (Practice, Quiz, Duel, Play, Test, Time, Learn; Hard unentered), the result screen and its review sheet, the settings dialog and night theme, the Equations level list and the Equations-Easy board.
-- Evidence collected: `research/observations/RUNTIME_FIRST_PASS.md` (full observation log), 44+ screenshots and 7+ `uiautomator` UI hierarchies under `research/observations/runtime/`, and E-RT-001 … E-RT-027 in `research/EVIDENCE_LOG.md`.
-- Specs updated: SCREEN_SPECIFICATIONS (9 runtime screens), NAVIGATION_MAP (runtime edges), GAME_MODES, GAME_RULES, SCORING_SYSTEM, DIFFICULTY_SYSTEM, FUNCTIONAL_SPECIFICATION, UNKNOWN_BEHAVIOR, TEST_MATRIX.
-- Implemented: nothing (M4 is deliberately not started; the user directed that implementation wait until M2 is complete).
-- Environment: `C:\Users\Administrator\.android` had to be created manually to fix the ADB profile-path failure; `npm install` succeeded on a hardened retry (299 packages) — `tsc --noEmit` clean, 26/26 tests pass (E-ENV-007).
-- Differences found: the live Equations board is 5x5 while the packaged `timerGameLevels` dataset is 7x8/8x9/9x10 — the dataset belongs to another variant, and the DEX class analysed earlier (`Game_MathPieces_Activity`) is not the class that runs live (`GameEquationsEasy`).
-- Remaining: the other 7 topics' modes (7 topics × up to 9 modes each), the 7 unplayed mini-games, the Equations drag interaction, persistence of progress, the main-menu utility tiles, and the Random Number mode.
-
-### Previous iteration: Math Pieces static refinement
-
-- Analyzed: Math Pieces drag touch start, accepted drop transfer, keyed-tag and row/column bookkeeping branches from static DEX.
-- Evidence added: E-APK-019 and E-IMPL-010; DEX-MP-005.
-- Implemented this iteration: isolated accepted-drop text transfer (target receives source text; source clears). No app UI integration.
-- Tests this iteration: `npm.cmd test` passed 23/23; strict standalone TypeScript check passed. The PowerShell `npm` shim was blocked by execution policy; `.cmd` invocation worked.
-- Differences found/resolved: static handler proves transfer rather than swap; exact drop acceptance conditions and rendered effects remain unknown.
-- Remaining: runtime launch, full board event/state modeling, and actual UI integration.
+- Analyzed: all M2 runtime observations (27 evidence entries E-RT-001…E-RT-027) synthesized into formal specifications.
+- Specs written: `SPEC_ADDITION_PRACTICE.md`, `SPEC_ADDITION_QUIZ.md`, `SPEC_ADDITION_DUEL.md`, `SPEC_ADDITION_TEST.md`, `SPEC_ADDITION_TIME.md`, `SPEC_ADDITION_PLAY.md`, `SPEC_ADDITION_LEARN.md`, `SPEC_EQUATIONS.md`, `SPEC_SETTINGS.md`, `SPEC_NAVIGATION.md`, `SPEC_PERSISTENCE.md`, plus `STATE_MACHINES.md` (complete ASCII state machines for all observed modes).
+- All UNKNOWN behaviors explicitly labelled in each spec and aggregated in `UNKNOWN_BEHAVIOR.md`.
+- `TEST_MATRIX.md` updated with specification rows linking evidence to implementation targets.
+- `REENGINEERING_PLAN.md` updated with M3 completion.
+- Implemented: nothing (M4 not started per user direction).
+- Remaining for M4: implement verified modes (Practice, Quiz, Duel, Test, Time, Settings, Navigation, Equations level list) in Expo/React Native with differential testing against captured reference evidence.
 
 - Analyzed: supplied APK identity; static DEX paths for random-number input alternation, expression result/target branches, help dialog, result actions, level initialization/hint gate and route chain from GameActivity through the level list; packaged help illustrations supporting an inferred chained-equation objective; all 250 random-number level records' schema/distributions; multiplayer question generator and room-construction call; MainActivity navigation switch/resources; splash-to-main code path; Math Pieces five-cell row/column validation, inferred grid objective, 150-level asset schema, three grid dimensions and completion star formula.
 - Evidence collected: `research/observations/DEX_BEHAVIOR_FINDINGS.md`, `research/EVIDENCE_LOG.md` (E-APK-008 through E-APK-018, E-IMPL-005/006/007/008/009), `research/NAVIGATION_MAP.md`, and compiled layout trees for MainActivity, GameLevelsActivity, the level item, RandomGameActivity, help dialog and result screen.
@@ -93,6 +81,7 @@ Label claims CONFIRMED (directly observed or exact artifact/code facts), INFERRE
 - [x] Observe all reachable screens/modes across sessions and complete evidence-linked specifications. *(complete for M2: 9 screens / 7 topics / 7 Addition modes / Equations captured)*
 - [x] Create the independent RN app shell and check the official Expo SDK 58 version matrix.
 - [x] Restore packages, verify with the local Expo CLI, typecheck and build the Android app. *(packages restored, typecheck clean; Android build pending)*
+- [x] **Complete evidence-linked specifications and state machines for all observed modes** (M3).
 - [ ] Implement all verified flows/modes, persistence and settings.
 - [ ] Differential and automated/device testing.
 - [ ] Build Android and audit all completion criteria.
