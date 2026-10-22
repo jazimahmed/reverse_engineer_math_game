@@ -1,0 +1,84 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      architectures:
+        description: APK target architectures
+        type: choice
+        default: arm64-v8a,x86_64
+        options:
+          - arm64-v8a,x86_64
+          - arm64-v8a
+          - x86_64
+          - armeabi-v7a,arm64-v8a,x86,x86_64
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CI: 'true'
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install locked dependencies
+        run: npm ci --include=dev --no-audit --no-fund
+      - name: Check TypeScript and domain tests
+        run: |
+          npm run typecheck
+          npm test
+      - name: Build release APK
+        working-directory: android
+        env:
+          APK_ARCHITECTURES: ${{ inputs.architectures }}
+        run: |
+          set -o pipefail
+          mkdir -p ../build-logs
+          bash ./gradlew :app:assembleRelease \
+            "-PreactNativeArchitectures=$APK_ARCHITECTURES" \
+            --max-workers=2 --no-daemon --console=plain --stacktrace \
+            2>&1 | tee ../build-logs/android-release.log
+      - name: Verify bundled JavaScript and record checksum
+        run: |
+          python - <<'PY'
+          import zipfile
+          apk = 'android/app/build/outputs/apk/release/app-release.apk'
+          with zipfile.ZipFile(apk) as archive:
+              assert archive.getinfo('assets/index.android.bundle').file_size > 0, 'JavaScript bundle is missing or empty'
+              assert archive.testzip() is None, 'APK ZIP integrity check failed'
+          PY
+          sha256sum android/app/build/outputs/apk/release/app-release.apk > build-logs/apk-sha256.txt
+          git rev-parse HEAD > build-logs/source-commit.txt
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-games-research-apk-${{ github.run_number }}
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-diagnostics-${{ github.run_number }}
+          path: build-logs/
+          if-no-files-found: ignore
+          retention-days: 14

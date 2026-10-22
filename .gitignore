@@ -5,8 +5,10 @@ avd-data/
 node_modules/
 .expo/
 *.lock
-package-lock.json
+# Commit package-lock.json so local and CI builds resolve the same dependencies.
 
 # Scratch
 emulator.err.log
 emulator.out.log
+build-logs/
+dist/
