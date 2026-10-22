@@ -1,6 +1,8 @@
 ﻿# Defect log
 
-No defects have been assessed. Reference behavior and implementation are both unavailable at this milestone.
+No defects have been assessed for mode behavior yet. Reference behavior and implementation are both unavailable at this milestone for gameplay deltas; environment defects are below.
 
 | ID | Severity | Reproduction | Expected | Actual | Evidence | Root cause | Fix | Retest |
 |---|---|---|---|---|---|---|---|---|
+| D-ENV-001 | High | `npx expo run:android --variant release` (2026-10-20) | Gradle resolves `com.android.tools.build:gradle:9.2.1` from Google Maven | `Could not GET 'https://dl.google.com/.../gradle-9.2.1.pom' > No such host is known (dl.google.com)`; 2 failing tasks (`:gradle-plugin:settings-plugin:compileKotlin`, `:expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin`) | build log 2026-10-20 ("BUILD FAILED in 39m 10s"); `nslookup dl.google.com` returns IPv6-only addresses | dl.google.com is unreachable on this network (IPv6-only AAAA records, no route); other repos (services.gradle.org, repo.maven.apache.org, jitpack.io, maven.aliyun.com) are reachable - CONFIRMED by curl HTTP 200 tests | Pre-downloaded gradle-9.4.1-bin.zip into wrapper dist dir (SHA256 verified `2ab2958f...bb7ec6cb`); added `https://maven.aliyun.com/repository/google` mirror to `android/build.gradle` repo blocks AND the included-build plugin files in node_modules (`@react-native/gradle-plugin/{settings-plugin,react-native-gradle-plugin}/build.gradle.kts`, `expo-modules-autolinking/android/expo-gradle-plugin/{expo-autolinking-settings-plugin,expo-autolinking-plugin,expo-max-sdk-override-plugin}/build.gradle.kts`). node_modules edits are regenerable - reapply after `npm install` | In progress (rebuild running) |
+---|

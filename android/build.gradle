@@ -2,6 +2,11 @@
 
 buildscript {
   repositories {
+    // WORKAROUND (network): dl.google.com is unreachable from this network
+    // (IPv6-only DNS, connection fails) - Aliyun mirrors Google Maven.
+    // Note: the included gradle-plugin builds in node_modules use their own
+    // repo lists and got the same mirror line added manually.
+    maven { url 'https://maven.aliyun.com/repository/google' }
     google()
     mavenCentral()
   }
@@ -15,6 +20,7 @@ buildscript {
 
 allprojects {
   repositories {
+    maven { url 'https://maven.aliyun.com/repository/google' }
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
