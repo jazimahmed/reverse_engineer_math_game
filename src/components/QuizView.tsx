@@ -2,12 +2,12 @@
 // Missing-operand format: n1 + ? = answer, 4 options, same scoring as Practice
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { QuestionState } from '@store/index';
 import { Colors } from '@constants/index';
-import { GameConstants } from '@constants/index';
 
 interface QuizViewProps {
+  disabled?: boolean;
   questionIndex: number;
   totalQuestions: number;
   greenChip: number;
@@ -19,6 +19,7 @@ interface QuizViewProps {
 }
 
 export function QuizView({
+  disabled = false,
   questionIndex,
   totalQuestions,
   greenChip,
@@ -31,7 +32,22 @@ export function QuizView({
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showFlash, setShowFlash] = useState(false);
   const [optionStates, setOptionStates] = useState<Record<number, 'idle' | 'correct' | 'wrong'>>({});
-  const flashAnim = useRef(new Animated.Value(0)).current;
+  const resolved = useRef(false);
+  const hadWrongAnswer = useRef(false);
+
+  useEffect(() => {
+    resolved.current = false;
+    hadWrongAnswer.current = false;
+    setSelectedOption(null);
+    setOptionStates({});
+    setShowFlash(false);
+  }, [currentQuestion, questionIndex]);
+
+  useEffect(() => {
+    if (!showFlash) return;
+    const timer = setTimeout(() => setShowFlash(false), 300);
+    return () => clearTimeout(timer);
+  }, [showFlash, currentQuestion, questionIndex]);
 
   const q = currentQuestion;
   if (!q) return null;
@@ -44,36 +60,28 @@ export function QuizView({
       : colors.background;
 
   const handlePress = (optionIndex: number, userAnswer: number) => {
-    if (selectedOption !== null) return;
-    const isCorrect = userAnswer === q.correctOptionIndex ? true : userAnswer === q.options[q.correctOptionIndex];
+    if (disabled || resolved.current) return;
     // Correct answer is the missing operand (n2)
     const correctValue = q.options[q.correctOptionIndex];
     const isCorrectAnswer = userAnswer === correctValue;
-    const firstTry = optionStates[optionIndex] !== 'wrong';
+    const firstTry = !hadWrongAnswer.current;
 
-    setSelectedOption(optionIndex);
+    if (isCorrectAnswer) {
+      resolved.current = true;
+      setSelectedOption(optionIndex);
+    } else {
+      hadWrongAnswer.current = true;
+    }
     setOptionStates((prev) => ({ ...prev, [optionIndex]: isCorrectAnswer ? 'correct' : 'wrong' }));
 
     if (isCorrectAnswer) {
       setShowFlash(true);
-      flashAnim.setValue(1);
-      Animated.timing(flashAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setShowFlash(false));
 
       onAnswer(userAnswer, true, firstTry);
     } else {
       onAnswer(userAnswer, false, firstTry);
     }
   };
-
-  useEffect(() => {
-    setSelectedOption(null);
-    setOptionStates({});
-    setShowFlash(false);
-  }, [questionIndex]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
@@ -118,7 +126,7 @@ export function QuizView({
               key={idx}
               style={[styles.optionBtn, { backgroundColor: btnColor }]}
               onPress={() => handlePress(idx, opt)}
-              disabled={selectedOption !== null}
+              disabled={disabled || selectedOption !== null}
               activeOpacity={0.8}
             >
               <Text style={[styles.optionText, { color: textColor }]}>{opt}</Text>
