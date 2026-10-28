@@ -1,80 +1,23 @@
-// Color constants from runtime observation (E-RT-002, E-RT-005, E-RT-007, E-RT-011)
-
+// Shared semantic palette. Feedback colors remain readable in either theme.
 export const Colors = {
-  // Light theme (default)
   light: {
-    background: '#49C2FF',        // Practice idle (observed session 1)
-    backgroundAlt: '#99CC00',     // Practice idle (observed session 2)
-    backgroundAlt2: '#2A52A3',    // Practice idle (observed session 3)
-    // Note: idle background cycles per session; semantic states below are stable
-    correctFlash: '#0E7C00',      // Green flash on correct answer
-    finalQuestion: '#FEB401',     // Orange on Q10
-    wrongOption: '#FF0000',       // Red button on wrong tap
-    wrongText: '#000000',         // Black text on wrong option
-    surface: '#FFFFFF',
-    surfaceDark: '#F4F6F8',
-    textPrimary: '#1D2733',
-    textSecondary: '#4B5968',
-    border: '#E0E4E8',
-    // Topic tile colors (observed)
-    addition: '#4CAF50',          // Green
-    subtraction: '#2196F3',       // Light blue
-    multiplication: '#FF9800',    // Orange
-    division: '#E91E63',          // Pink (drawn as checkmark)
-    squareRoot: '#9C27B0',        // Purple
-    decimal: '#00BCD4',           // Teal
-    fraction: '#3F51B5',          // Blue
-    games: '#2E7D32',             // Dark green
-    // UI
-    settingsBg: '#7B1FA2',        // Purple dialog
-    nightBg: '#121212',           // Near-black
-    nightSurface: '#1E1E1E',      // Dark grey tiles
-    nightBorder: '#333333',       // Light grey borders
-    nightText: '#FFFFFF',         // White glyphs
-    // Counters
-    greenChip: '#4CAF50',
-    redChip: '#F44336',
-    // Result screen
-    restartBtn: '#00BCD4',        // Cyan
-    exitBtn: '#9C27B0',           // Purple
-    // Footer icons
-    footerBg: '#F5F5F5',
+    background: '#F4F6FB', backgroundAlt: '#EEF2FF', backgroundAlt2: '#E7F5F3',
+    correctFlash: '#DDF5E9', finalQuestion: '#FFF4DB', wrongOption: '#FCE4E7', wrongText: '#A1263C',
+    surface: '#FFFFFF', surfaceDark: '#E9EDF5', textPrimary: '#18253F', textSecondary: '#586780', border: '#DCE3EF',
+    addition: '#17785D', subtraction: '#2563C1', multiplication: '#A15B16', division: '#B4326A',
+    squareRoot: '#7052C1', decimal: '#087F8C', fraction: '#4F5DBC', games: '#17785D',
+    settingsBg: '#FFFFFF', nightBg: '#101827', nightSurface: '#1C2940', nightBorder: '#34445E', nightText: '#FFFFFF',
+    greenChip: '#17785D', redChip: '#BF3450', restartBtn: '#4F5DBC', exitBtn: '#586780', footerBg: '#EEF2FF',
   },
-
-  // Dark theme (Night mode ON)
   dark: {
-    background: '#121212',
-    backgroundAlt: '#121212',
-    backgroundAlt2: '#121212',
-    correctFlash: '#2E7D32',
-    finalQuestion: '#FF9800',
-    wrongOption: '#EF5350',
-    wrongText: '#FFFFFF',
-    surface: '#1E1E1E',
-    surfaceDark: '#2D2D2D',
-    textPrimary: '#FFFFFF',
-    textSecondary: '#B0BEC5',
-    border: '#333333',
-    addition: '#4CAF50',
-    subtraction: '#64B5F6',
-    multiplication: '#FFB74D',
-    division: '#F06292',
-    squareRoot: '#BA68C8',
-    decimal: '#4DD0E1',
-    fraction: '#7986CB',
-    games: '#66BB6A',
-    settingsBg: '#4A148C',
-    nightBg: '#121212',
-    nightSurface: '#1E1E1E',
-    nightBorder: '#333333',
-    nightText: '#FFFFFF',
-    greenChip: '#66BB6A',
-    redChip: '#EF5350',
-    restartBtn: '#4DD0E1',
-    exitBtn: '#BA68C8',
-    footerBg: '#1E1E1E',
+    background: '#101827', backgroundAlt: '#202C48', backgroundAlt2: '#173D39',
+    correctFlash: '#173D39', finalQuestion: '#3C3320', wrongOption: '#52283A', wrongText: '#FFBDCB',
+    surface: '#1C2940', surfaceDark: '#25344D', textPrimary: '#EFF4FF', textSecondary: '#AABAD4', border: '#34445E',
+    addition: '#6AD7B0', subtraction: '#8DBBFF', multiplication: '#F4BE79', division: '#F8A4CA',
+    squareRoot: '#C3ADFF', decimal: '#74D7E0', fraction: '#AFB9FF', games: '#6AD7B0',
+    settingsBg: '#1C2940', nightBg: '#101827', nightSurface: '#1C2940', nightBorder: '#34445E', nightText: '#FFFFFF',
+    greenChip: '#17785D', redChip: '#BF3450', restartBtn: '#4F5DBC', exitBtn: '#586780', footerBg: '#202C48',
   },
-} as const;
-
+};
 export type ThemeMode = 'light' | 'dark';
 export type ColorSet = typeof Colors.light;

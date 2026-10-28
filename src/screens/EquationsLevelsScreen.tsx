@@ -77,6 +77,8 @@ const styles = StyleSheet.create({
   backBtn: { width: 48, alignItems: 'center' },
   title: { flex: 1, textAlign: 'center', fontSize: 22, fontWeight: '700' },
   gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: 16,
     flexGrow: 1,
   },

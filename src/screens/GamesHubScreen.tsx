@@ -82,13 +82,15 @@ const styles = StyleSheet.create({
   title: { flex: 1, textAlign: 'center', fontSize: 22, fontWeight: '700' },
   crownBtn: { width: 48, alignItems: 'flex-end' },
   gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     padding: 16,
     flexGrow: 1,
   },
   gameTile: {
     width: '48%',
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     margin: '1%',

@@ -1,5 +1,16 @@
 # Core gameplay repair status
 
+## Follow-up Jira repairs (2026-10-28)
+
+### MG-1 — Modern UI
+
+- Added shared light/dark semantic colors, safe-area support, responsive cards, readable typography, and accessible buttons.
+- Redesigned home, topic selection, answer screens, Duel, results, and startup. Removed the artificial 12-second splash and incorrect reference branding.
+- Fixed wrapping topic/game/level grids and review-sheet touch dismissal. Shared answer UI retains retry/duplicate-answer guards.
+- Validation: TypeScript passed; all 53 existing automated tests passed. Visual/device acceptance has not been performed.
+
+MG-2 and MG-3 are the next sequential repairs. The original core-repair record below is historical.
+
 **Date:** 2026-10-28
 
 **Scope:** First repair pass from `PROJECT_REVIEW.md`: round progression, retry handling, scoring, and timeouts for the existing Addition-based Practice, Quiz, Test, Time, and Duel flows.
