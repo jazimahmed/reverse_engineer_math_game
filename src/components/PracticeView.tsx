@@ -2,12 +2,12 @@
 // 10 questions, 4 options 2x2, first-try green chip, retry red chip, green flash, orange on Q10
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, SafeAreaView } from 'react-native';
-import { QuestionState, GameMode } from '@store/index';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { QuestionState } from '@store/index';
 import { Colors } from '@constants/index';
-import { GameConstants } from '@constants/index';
 
 interface PracticeViewProps {
+  disabled?: boolean;
   questionIndex: number;
   totalQuestions: number;
   greenChip: number;
@@ -20,6 +20,7 @@ interface PracticeViewProps {
 }
 
 export function PracticeView({
+  disabled = false,
   questionIndex,
   totalQuestions,
   greenChip,
@@ -33,7 +34,22 @@ export function PracticeView({
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showFlash, setShowFlash] = useState(false);
   const [optionStates, setOptionStates] = useState<Record<number, 'idle' | 'correct' | 'wrong'>>({});
-  const flashAnim = useRef(new Animated.Value(0)).current;
+  const resolved = useRef(false);
+  const hadWrongAnswer = useRef(false);
+
+  useEffect(() => {
+    resolved.current = false;
+    hadWrongAnswer.current = false;
+    setSelectedOption(null);
+    setOptionStates({});
+    setShowFlash(false);
+  }, [currentQuestion, questionIndex]);
+
+  useEffect(() => {
+    if (!showFlash) return;
+    const timer = setTimeout(() => setShowFlash(false), 300);
+    return () => clearTimeout(timer);
+  }, [showFlash, currentQuestion, questionIndex]);
 
   const q = currentQuestion;
   if (!q) return null;
@@ -46,23 +62,22 @@ export function PracticeView({
       : colors.background;
 
   const handlePress = (optionIndex: number, userAnswer: number) => {
-    if (selectedOption !== null) return; // Already answered
+    if (disabled || resolved.current) return;
 
     const isCorrect = userAnswer === q.answer;
-    const firstTry = optionStates[optionIndex] !== 'wrong';
+    const firstTry = !hadWrongAnswer.current;
 
-    setSelectedOption(optionIndex);
+    if (isCorrect) {
+      resolved.current = true;
+      setSelectedOption(optionIndex);
+    } else {
+      hadWrongAnswer.current = true;
+    }
     setOptionStates((prev) => ({ ...prev, [optionIndex]: isCorrect ? 'correct' : 'wrong' }));
 
     if (isCorrect) {
       // Green flash
       setShowFlash(true);
-      flashAnim.setValue(1);
-      Animated.timing(flashAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setShowFlash(false));
 
       onAnswer(userAnswer, true, firstTry);
     } else {
@@ -70,13 +85,6 @@ export function PracticeView({
       onAnswer(userAnswer, false, firstTry);
     }
   };
-
-  // Reset option states when question changes
-  useEffect(() => {
-    setSelectedOption(null);
-    setOptionStates({});
-    setShowFlash(false);
-  }, [questionIndex]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
@@ -108,7 +116,7 @@ export function PracticeView({
         <Text style={[styles.eqOperator, { color: colors.textPrimary }]}>{q.operator}</Text>
         <Text style={[styles.eqNumber, { color: colors.textPrimary }]}>{q.n2 === '?' ? '?' : q.n2}</Text>
         <Text style={[styles.eqOperator, { color: colors.textPrimary }]}>=</Text>
-        <Text style={[styles.eqAnswer, { color: colors.textPrimary }]}>{q.answer === '?' ? '?' : q.answer}</Text>
+        <Text style={[styles.eqAnswer, { color: colors.textPrimary }]}>?</Text>
       </View>
 
       {/* Options 2x2 grid */}
@@ -129,7 +137,7 @@ export function PracticeView({
               key={idx}
               style={[styles.optionBtn, { backgroundColor: btnColor }]}
               onPress={() => handlePress(idx, opt)}
-              disabled={selectedOption !== null}
+              disabled={disabled || selectedOption !== null}
               activeOpacity={0.8}
             >
               <Text style={[styles.optionText, { color: textColor }]}>{opt}</Text>

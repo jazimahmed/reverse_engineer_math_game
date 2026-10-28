@@ -4,11 +4,12 @@
 // Correct tap advances
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { QuestionState } from '@store/index';
 import { Colors } from '@constants/index';
 
 interface TestViewProps {
+  disabled?: boolean;
   questionIndex: number;
   totalQuestions: number;
   greenChip: number;
@@ -20,6 +21,7 @@ interface TestViewProps {
 }
 
 export function TestView({
+  disabled = false,
   questionIndex,
   totalQuestions,
   greenChip,
@@ -32,7 +34,22 @@ export function TestView({
   const [selectedVerdict, setSelectedVerdict] = useState<'true' | 'false' | null>(null);
   const [showFlash, setShowFlash] = useState(false);
   const [verdictStates, setVerdictStates] = useState<Record<string, 'idle' | 'correct' | 'wrong'>>({});
-  const flashAnim = useRef(new Animated.Value(0)).current;
+  const resolved = useRef(false);
+  const hadWrongAnswer = useRef(false);
+
+  useEffect(() => {
+    resolved.current = false;
+    hadWrongAnswer.current = false;
+    setSelectedVerdict(null);
+    setVerdictStates({});
+    setShowFlash(false);
+  }, [currentQuestion, questionIndex]);
+
+  useEffect(() => {
+    if (!showFlash) return;
+    const timer = setTimeout(() => setShowFlash(false), 300);
+    return () => clearTimeout(timer);
+  }, [showFlash, currentQuestion, questionIndex]);
 
   const q = currentQuestion;
   if (!q || !q.isTrueFalse) return null;
@@ -48,29 +65,27 @@ export function TestView({
   const correctVerdict = q.correctOptionIndex === 0 ? 'true' : 'false';
 
   const handlePress = (verdict: 'true' | 'false') => {
-    if (selectedVerdict !== null) return;
+    if (disabled || resolved.current) return;
     const isCorrect = verdict === correctVerdict;
-    const firstTry = verdictStates[verdict] !== 'wrong';
+    const firstTry = !hadWrongAnswer.current;
 
-    setSelectedVerdict(verdict);
+    if (isCorrect) {
+      resolved.current = true;
+      setSelectedVerdict(verdict);
+    } else {
+      hadWrongAnswer.current = true;
+    }
     setVerdictStates((prev) => ({ ...prev, [verdict]: isCorrect ? 'correct' : 'wrong' }));
 
     if (isCorrect) {
       setShowFlash(true);
       // onAnswer advances the question
       onAnswer(verdict === 'true', true, firstTry);
-      setTimeout(() => setShowFlash(false), 300);
     } else {
       // Wrong - immediate red increment, no advance
       onAnswer(verdict === 'true', false, firstTry);
     }
   };
-
-  useEffect(() => {
-    setSelectedVerdict(null);
-    setVerdictStates({});
-    setShowFlash(false);
-  }, [questionIndex]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
@@ -112,7 +127,7 @@ export function TestView({
               key={v}
               style={[styles.verdictBtn, { backgroundColor: isWrong ? colors.wrongOption : isCorrect ? colors.greenChip : colors.surface }]}
               onPress={() => handlePress(v as 'true' | 'false')}
-              disabled={selectedVerdict !== null}
+              disabled={disabled || selectedVerdict !== null}
               activeOpacity={0.8}
             >
               <Text style={[styles.verdictText, { color: isWrong ? colors.wrongText : colors.textPrimary }]}>

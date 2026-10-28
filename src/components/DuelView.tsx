@@ -4,11 +4,12 @@
 // Wrong decrements corresponding chip
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { QuestionState, DuelQuestionState } from '@store/index';
 import { Colors } from '@constants/index';
 
 interface DuelViewProps {
+  disabled?: boolean;
   questionIndex: number;
   totalQuestions: number;
   greenChip: number; // Not used in Duel
@@ -23,6 +24,7 @@ interface DuelViewProps {
 }
 
 export function DuelView({
+  disabled = false,
   questionIndex,
   totalQuestions,
   currentQuestion,
@@ -36,6 +38,14 @@ export function DuelView({
     top: Record<number, 'idle' | 'correct' | 'wrong'>;
     bottom: Record<number, 'idle' | 'correct' | 'wrong'>;
   }>({ top: {}, bottom: {} });
+  const resolved = useRef(false);
+  const [answered, setAnswered] = useState(false);
+
+  useEffect(() => {
+    resolved.current = false;
+    setAnswered(false);
+    setOptionStates({ top: {}, bottom: {} });
+  }, [currentQuestion, questionIndex]);
 
   const q = currentQuestion as DuelQuestionState | null;
   if (!q) return null;
@@ -44,9 +54,13 @@ export function DuelView({
   const bottomQ = q.bottom;
 
   const handlePress = (half: 'top' | 'bottom', optionIndex: number, userAnswer: number) => {
+    if (disabled || resolved.current) return;
     const correctValue = half === 'top' ? topQ.options[topQ.correctOptionIndex] : bottomQ.options[bottomQ.correctOptionIndex];
     const isCorrect = userAnswer === correctValue;
-    const firstTry = optionStates[half][optionIndex] !== 'wrong';
+    if (isCorrect) {
+      resolved.current = true;
+      setAnswered(true);
+    }
 
     setOptionStates((prev) => ({
       ...prev,
@@ -71,7 +85,7 @@ export function DuelView({
           <Text style={styles.eqOperator}>{topQ.operator}</Text>
           <Text style={styles.eqNumber}>{topQ.n2 === '?' ? '?' : topQ.n2}</Text>
           <Text style={styles.eqOperator}>=</Text>
-          <Text style={styles.eqAnswer}>{topQ.answer === '?' ? '?' : topQ.answer}</Text>
+          <Text style={styles.eqAnswer}>?</Text>
         </View>
 
         <View style={styles.optionsGrid}>
@@ -84,6 +98,7 @@ export function DuelView({
                 key={idx}
                 style={[styles.optionBtn, { backgroundColor: isWrong ? colors.wrongOption : isCorrect ? colors.greenChip : colors.surface }]}
                 onPress={() => handlePress('top', idx, opt)}
+                disabled={disabled || answered}
                 activeOpacity={0.8}
               >
                 <Text style={{ fontSize: 28, fontWeight: '700', color: isWrong ? colors.wrongText : colors.textPrimary }}>{opt}</Text>
@@ -106,7 +121,7 @@ export function DuelView({
           <Text style={styles.eqOperator}>{bottomQ.operator}</Text>
           <Text style={styles.eqNumber}>{bottomQ.n2 === '?' ? '?' : bottomQ.n2}</Text>
           <Text style={styles.eqOperator}>=</Text>
-          <Text style={styles.eqAnswer}>{bottomQ.answer === '?' ? '?' : bottomQ.answer}</Text>
+          <Text style={styles.eqAnswer}>?</Text>
         </View>
 
         <View style={styles.optionsGrid}>
@@ -119,6 +134,7 @@ export function DuelView({
                 key={idx}
                 style={[styles.optionBtn, { backgroundColor: isWrong ? colors.wrongOption : isCorrect ? colors.greenChip : colors.surface }]}
                 onPress={() => handlePress('bottom', idx, opt)}
+                disabled={disabled || answered}
                 activeOpacity={0.8}
               >
                 <Text style={{ fontSize: 28, fontWeight: '700', color: isWrong ? colors.wrongText : colors.textPrimary }}>{opt}</Text>

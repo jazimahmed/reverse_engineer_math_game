@@ -21,11 +21,11 @@ export function ResultScreen() {
   const [showReview, setShowReview] = useState(false);
 
   const handleRestart = () => {
-    navigation.navigate('Game', { modeId, topicId });
+    navigation.replace('Game', { modeId, topicId });
   };
 
   const handleExit = () => {
-    navigation.navigate('ModeSelect', { topicId });
+    navigation.popTo('TopicSelect', { topicId });
   };
 
   return (
@@ -37,13 +37,13 @@ export function ResultScreen() {
         {/* Counters */}
         <View style={styles.counterRow}>
           <View style={styles.counterBox}>
-            <Text style={[styles.counterLabel, { color: colors.textSecondary }]}>Correct</Text>
-            <Text style={[styles.counterValue, { color: colors.greenChip }]}>{score.greenChip}</Text>
+            <Text style={[styles.counterLabel, { color: colors.textSecondary }]}>{modeId === 'duel' ? 'Bottom' : 'Correct'}</Text>
+            <Text style={[styles.counterValue, { color: colors.greenChip }]}>{modeId === 'duel' ? score.duelChipBottom : score.greenChip}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.counterBox}>
-            <Text style={[styles.counterLabel, { color: colors.textSecondary }]}>Wrong</Text>
-            <Text style={[styles.counterValue, { color: colors.redChip }]}>{score.redChip}</Text>
+            <Text style={[styles.counterLabel, { color: colors.textSecondary }]}>{modeId === 'duel' ? 'Top' : 'Wrong'}</Text>
+            <Text style={[styles.counterValue, { color: colors.redChip }]}>{modeId === 'duel' ? score.duelChipTop : score.redChip}</Text>
           </View>
         </View>
 
@@ -97,7 +97,7 @@ export function ResultScreen() {
                       styles.reviewAnswer,
                       { color: item.correct ? colors.greenChip : colors.redChip }
                     ]}>
-                      {item.correct ? '✓' : '✕'} {item.firstTry ? '(1st)' : '(retry)'}
+                      {item.correct ? '✓' : '✕'} {item.userAnswer === null ? '(timeout)' : item.firstTry ? '(1st)' : '(retry)'}
                     </Text>
                   </View>
                 </View>
