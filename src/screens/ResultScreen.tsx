@@ -17,7 +17,7 @@ export function ResultScreen() {
       <Text style={{ color: colors.fraction, fontSize: 44, fontWeight: '800', textAlign: 'center' }}>✓</Text>
       <Text style={[ui.title, { color: colors.textPrimary, textAlign: 'center' }]}>Nice work showing up.</Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 20 }}>
-        {[{ label: duel ? 'Bottom player' : 'First try', value: duel ? score.duelChipBottom : score.greenChip },
+        {[{ label: duel ? 'Bottom player' : modeId === 'learn' ? 'Learned' : 'First try', value: duel ? score.duelChipBottom : score.greenChip },
           { label: duel ? 'Top player' : 'Retry / missed', value: duel ? score.duelChipTop : score.redChip }].map(({ label, value }) =>
           <View key={label} style={{ alignItems: 'center', gap: 8 }}><Text style={{ fontSize: 38, fontWeight: '800', color: colors.textPrimary }}>{value}</Text><Text style={{ color: colors.textSecondary }}>{label}</Text></View>)}
       </View>
@@ -32,7 +32,7 @@ export function ResultScreen() {
           <Text style={[ui.title, { color: colors.textPrimary }]}>Your round</Text>
           <ScrollView>{score.questionHistory.map((item, index) => <View key={index} style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: colors.border, gap: 8 }}>
             <Text style={{ color: colors.textPrimary, fontSize: 19 }}>{index + 1}. {item.question}</Text>
-            <Text style={{ color: colors.textSecondary }}>{item.userAnswer === null ? 'Time ran out' : item.firstTry ? 'Correct on the first try' : 'Solved after a retry'}</Text>
+            <Text style={{ color: colors.textSecondary }}>{item.userAnswer === null ? 'Time ran out' : !item.correct ? 'Incorrect answer' : modeId === 'learn' ? 'Lesson completed' : item.firstTry ? 'Correct on the first try' : 'Solved after a retry'}</Text>
           </View>)}</ScrollView>
           <ActionButton label="Done" onPress={() => setReview(false)} />
         </View>

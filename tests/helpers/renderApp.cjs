@@ -8,7 +8,7 @@ const renderer = require('react-test-renderer');
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 // Real React + Zustand, with only native/platform boundaries replaced for Node.
-module.exports = function renderApp() {
+module.exports = function renderApp(clock) {
   const cache = new Map();
   const storage = new Map();
   const calls = [];
@@ -62,7 +62,11 @@ module.exports = function renderApp() {
       fileName: filename,
       compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
     });
-    new Function('require', 'module', 'exports', outputText)(localRequire, module, module.exports);
+    const ClockDate = clock ? class extends Date { static now() { return clock.now(); } } : Date;
+    new Function('require', 'module', 'exports', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', outputText)(
+      localRequire, module, module.exports, clock?.setTimeout ?? setTimeout, clock?.clearTimeout ?? clearTimeout,
+      clock?.setInterval ?? setInterval, clock?.clearInterval ?? clearInterval, ClockDate,
+    );
     return module.exports;
   }
   return { React, renderer, act: renderer.act, load, storage, calls, alerts, context, native,

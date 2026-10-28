@@ -9,7 +9,7 @@ import { AppScreen, PageHeader, ui, useTheme } from '../components/ui';
 const descriptions: Record<string, string> = {
   practice: 'Take your time. Try again.', quiz: 'Find the missing number.', duel: 'Two players. One challenge.',
   test: 'Is the equation true or false?', time: 'Think fast. Beat the clock.', play: 'Type it. Solve it.',
-  learn: 'Learn one step at a time.', hard: 'Ready for bigger numbers?', exam: 'Put your skills to the test.',
+  learn: 'Worked examples, step by step.', hard: 'Ready for bigger numbers?', exam: 'One attempt. Make it count.',
   addition: 'Add numbers together.', subtract: 'Find the difference.', multiply: 'Multiply the numbers.', division: 'Divide and conquer.',
 };
 

@@ -4,6 +4,7 @@ import { QuestionState } from '../store/gameSessionStore';
 import { ColorSet } from '../constants/colors';
 import { GameConstants } from '../constants/game';
 import { ui } from './ui';
+import { formatQuestion } from '../utils/questionGenerator';
 
 export interface AnswerViewProps {
   questionIndex: number; totalQuestions: number; greenChip: number; redChip: number;
@@ -13,7 +14,7 @@ export interface AnswerViewProps {
 }
 
 export function AnswerView({ questionIndex, totalQuestions, greenChip, redChip, currentQuestion: q,
-  colors, disabled = false, onAnswer, timeRemaining, kind }: AnswerViewProps & { kind: 'practice' | 'quiz' | 'test' | 'time' }) {
+  colors, disabled = false, onAnswer, timeRemaining, kind }: AnswerViewProps & { kind: 'practice' | 'quiz' | 'test' | 'time' | 'exam' }) {
   const [selected, setSelected] = useState<Record<number, boolean>>({});
   const resolved = useRef(false);
   const retried = useRef(false);
@@ -25,7 +26,7 @@ export function AnswerView({ questionIndex, totalQuestions, greenChip, redChip, 
     if (disabled || resolved.current) return;
     const correct = value === correctValue;
     const firstTry = !retried.current;
-    if (correct) resolved.current = true;
+    if (correct || kind === 'exam') resolved.current = true;
     else retried.current = true;
     setSelected((previous) => ({ ...previous, [index]: correct }));
     onAnswer(verdict ? index === 0 : value, correct, firstTry);
@@ -45,21 +46,21 @@ export function AnswerView({ questionIndex, totalQuestions, greenChip, redChip, 
     <View style={[ui.card, { backgroundColor: colors.surface, borderColor: colors.border, alignItems: 'center', paddingVertical: 36 }]}>
       <Text style={{ color: colors.textSecondary, fontSize: 15 }}>{title}</Text>
       <Text adjustsFontSizeToFit numberOfLines={2} style={{ fontSize: 38, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', paddingVertical: 18 }}>
-        {q.n1} {q.operator} {q.n2} = {kind === 'practice' ? '?' : q.answer}
+        {formatQuestion(q, kind === 'practice' || kind === 'exam')}
       </Text>
       <Text accessibilityLiveRegion="polite" style={{ color: colors.textSecondary }}>
-        {resolved.current ? 'Nicely done!' : retried.current ? 'Not quite. Give it another try.' : 'You’ve got this.'}
+        {resolved.current ? Object.values(selected).includes(true) ? 'Nicely done!' : 'Keep going. Next question coming up.' : retried.current ? 'Not quite. Give it another try.' : kind === 'exam' ? 'One attempt per question.' : 'You’ve got this.'}
       </Text>
     </View>
     <View style={ui.grid}>
       {q.options.map((option, index) => <TouchableOpacity key={index} accessibilityRole="button"
-        accessibilityLabel={verdict ? index === 0 ? 'True' : 'False' : String(option)}
+        accessibilityLabel={verdict ? index === 0 ? 'True' : 'False' : q.display?.options?.[index] ?? String(option)}
         accessibilityState={{ disabled: disabled || resolved.current }} disabled={disabled || resolved.current}
         onPress={() => press(option, index)} style={{ width: '48%', minHeight: 88, borderWidth: 1, borderColor: colors.border,
           borderRadius: 20, justifyContent: 'center', alignItems: 'center', padding: 12,
           backgroundColor: selected[index] === true ? colors.correctFlash : selected[index] === false ? colors.wrongOption : colors.surface }}>
         <Text style={{ fontSize: verdict ? 24 : 30, fontWeight: '700', color: selected[index] === false ? colors.wrongText : colors.textPrimary }}>
-          {verdict ? index === 0 ? 'True' : 'False' : option}
+          {verdict ? index === 0 ? 'True' : 'False' : q.display?.options?.[index] ?? option}
         </Text>
       </TouchableOpacity>)}
     </View>

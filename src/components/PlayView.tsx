@@ -1,190 +1,47 @@
-// PlayView - Evidence: SPEC_ADDITION_PLAY.md, E-RT-025
-// LAYOUT ONLY - gameplay UNKNOWN
-// 3 simultaneous equations + on-screen keypad 0-9
-// No visible counters, timer, or progress
+import React, { useEffect, useRef, useState } from 'react';
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AnswerViewProps } from './AnswerView';
+import { ActionButton, ui } from './ui';
+import { formatQuestion, isAnswerCorrect, parseAnswer } from '../utils/questionGenerator';
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { QuestionState } from '@store/index';
-import { Colors } from '@constants/index';
-
-interface PlayViewProps {
-  questionIndex: number;
-  totalQuestions: number;
-  greenChip: number;
-  redChip: number;
-  currentQuestion: QuestionState | null;
-  colors: typeof Colors.light;
-  night: boolean;
-  onAnswer: (userAnswer: number, isCorrect: boolean, firstTry: boolean) => void;
-}
-
-export function PlayView({
-  questionIndex,
-  totalQuestions,
-  greenChip,
-  redChip,
-  currentQuestion,
-  colors,
-  night,
-  onAnswer,
-}: PlayViewProps) {
-  const [focusedAns, setFocusedAns] = useState<'ans' | 'ans1' | 'ans2' | 'ans3'>('ans');
-  const [answers, setAnswers] = useState<Record<string, string>>({
-    ans: '', ans1: '', ans2: '', ans3: '',
-  });
-
-  const q = currentQuestion;
+export function PlayView({ currentQuestion: q, questionIndex, totalQuestions, onAnswer, colors, disabled = false }: AnswerViewProps) {
+  const [input, setInput] = useState('');
+  const [message, setMessage] = useState('Enter your answer below.');
+  const resolved = useRef(false);
+  const retried = useRef(false);
+  useEffect(() => {
+    setInput(''); setMessage('Enter your answer below.'); resolved.current = false; retried.current = false;
+  }, [q, questionIndex]);
   if (!q) return null;
-
-  const equations = [
-    { label: 'ans', n1: q.n1, op: q.operator, n2: q.n2, ans: q.answer },
-    // Additional equations from currentQuestion if present (n11, n12, etc.)
-    { label: 'ans1', n1: (q as any).n11, op: (q as any).sgn1, n2: (q as any).n21, ans: (q as any).ans1 },
-    { label: 'ans2', n1: (q as any).n12, op: (q as any).sgn2, n2: (q as any).n22, ans: (q as any).ans2 },
-  ].filter(eq => eq.n1 !== undefined && eq.n1 !== '');
-
-  const handleKeypad = (digit: number) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [focusedAns]: prev[focusedAns] + digit.toString(),
-    }));
+  const locked = disabled || resolved.current;
+  const submit = () => {
+    if (disabled || resolved.current) return;
+    if (parseAnswer(input) === null) { setMessage('Enter a number or a fraction, such as 3/4.'); return; }
+    const correct = isAnswerCorrect(input, q);
+    const firstTry = !retried.current;
+    if (correct) resolved.current = true;
+    else retried.current = true;
+    setMessage(correct ? 'That’s it. Well done!' : 'Not quite. Edit your answer and try again.');
+    onAnswer(parseAnswer(input)!, correct, firstTry);
   };
-
-  const handleBackspace = () => {
-    setAnswers((prev) => ({
-      ...prev,
-      [focusedAns]: prev[focusedAns].slice(0, -1),
-    }));
-  };
-
-  const handleSubmit = () => {
-    // UNKNOWN - what constitutes submission?
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Equations area */}
-      <View style={styles.equationsArea}>
-        {equations.map((eq: any, idx: number) => (
-          <View key={idx} style={styles.equationRow}>
-            <Text style={styles.eqNumber}>{eq.n1}</Text>
-            <Text style={styles.eqOperator}>{eq.op}</Text>
-            <Text style={styles.eqNumber}>{eq.n2}</Text>
-            <Text style={styles.eqOperator}>=</Text>
-            <TouchableOpacity
-              style={[styles.answerSlot, focusedAns === eq.label && styles.answerSlotFocused]}
-              onPress={() => setFocusedAns(eq.label as any)}
-            >
-              <Text style={[
-                styles.answerText,
-                answers[eq.label] ? { color: colors.textPrimary } : { color: colors.textSecondary }
-              ]}>
-                {answers[eq.label] || '?'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-
-      {/* Keypad */}
-      <View style={styles.keypad}>
-        {[
-          [1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9],
-          ['backspace', 0, 'submit'],
-        ].map((row, rIdx) => (
-          <View key={rIdx} style={styles.keypadRow}>
-            {row.map((key: string | number, kIdx: number) => (
-              <TouchableOpacity
-                key={kIdx}
-                style={[styles.keyBtn, key === 'backspace' && styles.keyWide, key === 'submit' && styles.keyWide]}
-                onPress={() => {
-                  if (key === 'backspace') handleBackspace();
-                  else if (key === 'submit') handleSubmit();
-                  else handleKeypad(key as number);
-                }}
-              >
-                <Text style={styles.keyText}>
-                  {key === 'backspace' ? '⌫' : key === 'submit' ? '✓' : key}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-      </View>
-
-      {/* UNKNOWN badge */}
-      <View style={styles.unknownBadge}>
-        <Text style={styles.unknownText}>⚠ Gameplay UNKNOWN (E-RT-025)</Text>
-      </View>
-    </SafeAreaView>
-  );
+  return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.page}>
+    <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>PLAY · {questionIndex} / {totalQuestions}</Text>
+    <View style={[ui.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Text adjustsFontSizeToFit numberOfLines={2} style={{ color: colors.textPrimary, fontSize: 34, fontWeight: '800', textAlign: 'center' }}>{formatQuestion(q, true)}</Text>
+      <TextInput accessibilityLabel="Your answer" value={input} editable={!locked} maxLength={24} showSoftInputOnFocus={false}
+        onChangeText={(text) => setInput(text.replace(/[^\d./-]/g, '').slice(0, 24))} onSubmitEditing={submit}
+        placeholder="?" placeholderTextColor={colors.textSecondary}
+        style={{ borderWidth: 1, borderColor: colors.border, color: colors.textPrimary, padding: 16, borderRadius: 16, fontSize: 28, textAlign: 'center' }} />
+      <Text accessibilityLiveRegion="polite" style={{ color: colors.textSecondary, textAlign: 'center' }}>{message}</Text>
+    </View>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 }}>
+      {['7', '8', '9', '⌫', '4', '5', '6', 'Clear', '1', '2', '3', '/', '−', '0', '.'].map((key) =>
+        <TouchableOpacity key={key} accessibilityRole="button" accessibilityLabel={key === '⌫' ? 'Backspace' : key} disabled={locked}
+          onPress={() => setInput((value) => key === '⌫' ? value.slice(0, -1) : key === 'Clear' ? '' : (value + (key === '−' ? '-' : key)).slice(0, 24))}
+          style={{ width: '23%', minHeight: 58, borderRadius: 16, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: colors.textPrimary, fontSize: key === 'Clear' ? 15 : 24, fontWeight: '600' }}>{key}</Text>
+        </TouchableOpacity>)}
+    </View>
+    <ActionButton label="Check answer" disabled={locked} onPress={submit} />
+  </ScrollView>;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#49C2FF' },
-  equationsArea: {
-    flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-    gap: 16,
-  },
-  equationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  eqNumber: { fontSize: 36, fontWeight: '700', color: '#1D2733' },
-  eqOperator: { fontSize: 36, fontWeight: '700', color: '#1D2733' },
-  answerSlot: {
-    width: 100,
-    height: 60,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#E0E4E8',
-  },
-  answerSlotFocused: { borderColor: '#4CAF50', borderWidth: 3 },
-  answerText: { fontSize: 28, fontWeight: '700' },
-  keypad: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 12,
-  },
-  keypadRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  keyBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  keyWide: { width: '30%' },
-  keyText: { fontSize: 32, fontWeight: '700', color: '#1D2733' },
-  unknownBadge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    right: 12,
-    backgroundColor: 'rgba(255,193,7,0.9)',
-    padding: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  unknownText: { fontSize: 12, fontWeight: '600', color: '#1D2733' },
-});
