@@ -12,6 +12,7 @@ import { ModeSelectScreen } from '../screens/ModeSelectScreen';
 import { GameScreen } from '../screens/GameScreen';
 import { ResultScreen } from '../screens/ResultScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { GamesHubScreen } from '../screens/GamesHubScreen';
 import { EquationsLevelsScreen } from '../screens/EquationsLevelsScreen';
 import { EquationsBoardScreen } from '../screens/EquationsBoardScreen';
@@ -38,6 +39,7 @@ export function AppNavigator() {
         <Stack.Screen name="Game" component={GameScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="GamesHub" component={GamesHubScreen} />
         <Stack.Screen name="EquationsLevels" component={EquationsLevelsScreen} />
         <Stack.Screen name="EquationsBoard" component={EquationsBoardScreen} />

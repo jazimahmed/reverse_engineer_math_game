@@ -1,5 +1,56 @@
 # Core gameplay repair status
 
+## Follow-up Jira repairs (2026-10-28)
+
+### MG-1 — Modern UI
+
+- Added shared light/dark semantic colors, safe-area support, responsive cards, readable typography, and accessible buttons.
+- Redesigned home, topic selection, answer screens, Duel, results, and startup. Removed the artificial 12-second splash and incorrect reference branding.
+- Fixed wrapping topic/game/level grids and review-sheet touch dismissal. Shared answer UI retains retry/duplicate-answer guards.
+- Validation: TypeScript passed; all 53 existing automated tests passed. Visual/device acceptance has not been performed.
+
+### MG-2 — Working profile and settings
+
+- Added a named local profile with persisted edits and a working home shortcut.
+- Replaced the touch-dismissed settings overlay with usable appearance/vibration controls, restore preferences, confirmed progress reset, and Done/Android Back handling.
+- Removed irrelevant language switching, nonfunctional audio toggles, and empty footer actions. Correct-answer vibration now follows its preference.
+- Added in-game settings that pause/resume the same round; background/foreground changes do not resume gameplay underneath settings.
+- Added real React-rendered tests (native/storage/navigation boundaries mocked) for profile navigation, preference persistence/rehydration, reset confirmation, pause/resume, modal Back, and vibration/duplicate input. These are not device tests.
+- Validation: TypeScript passed; the focused menu tests pass. The added test-renderer dependency matches React 19.3.0.
+
+### MG-3 — Correct topics and complete arithmetic modes
+
+- Replaced the universal Addition fallback with an explicit validated topic/mode configuration. Unknown combinations show a recoverable unavailable screen without starting a session.
+- Added subtraction, multiplication, exact non-zero-divisor division, unary square roots, scaled decimal arithmetic, and rational fraction arithmetic/labels. Missing-operand questions have unique solutions; answer generation uses a bounded candidate list rather than an unbounded random loop.
+- Decimal operation tiles and Fraction addition/subtraction/multiplication/division select the requested operation. Hard raises difficulty; Exam uses one attempt per question.
+- Replaced the unfinished Learn screen with ten worked examples and reveal/next/complete actions. Replaced unfinished Play with a working keypad, input validation, equivalent fraction answers, retries, and a ten-question completion flow. Their research/UNKNOWN banners are gone.
+- Added topic/mode-scoped completion and best-score persistence. Results format roots/fractions/decimals correctly and distinguish wrong Exam answers from retries/timeouts and learned examples.
+- Added 11 generator/configuration tests (4,500 seeded questions across 45 advertised arithmetic routes), plus six rendered gameplay tests. The rendered full-flow test completes all 45 routes, including Play, Learn, Duel, and Exam: 450 questions with result navigation and progress writes.
+
+### Final follow-up verification
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | Passed |
+| `npm test` | 75 passed, 0 failed |
+| Rendered menu/settings tests | 5 passed; real React/Zustand, mocked native/navigation/storage boundaries |
+| Rendered gameplay tests | 6 passed; includes all 45 arithmetic route combinations and 450 completed questions |
+| Generator/configuration tests | 11 passed; includes 4,500 seeded questions, constant-RNG termination, invalid routes, equivalent fractions, and display formatting |
+| Android production bundle export | Passed: `npx expo export --platform android --output-dir C:\Users\Administrator\AppData\Local\Temp\opencode\mg-jira-android-export`; 897 modules, Hermes bundle emitted |
+| Physical device/emulator/native APK acceptance | Not performed |
+
+The renderer emits its upstream deprecation notice; existing Node module-format warnings also remain non-fatal. The Android export validates production JavaScript bundling, not native APK compilation or installation.
+
+### Remaining acceptance and scope
+
+- Review the new appearance on real compact/large phones in both themes; React rendering does not measure native layout or font scaling.
+- Verify installed-APK touch behavior, Android Back/navigation, vibration hardware, and storage after a real force-stop/relaunch.
+- Audio playback and translation are not implemented; their misleading settings/menu controls were removed. The profile is explicitly local, without cloud sign-in.
+- Learn is a guided-example mode and Play is a typed-answer mode. These are deliberate product implementations, not claims of exact reference-app behavior.
+- The separate Games hub's unfinished Equations puzzle and disabled mini-games are outside these arithmetic repairs. Production signing/versioning also remains a separate release task.
+
+The original core-repair record below is historical; the follow-up sections above supersede its resolved topic-routing, Play/Learn, menu, UI, and testing limitations.
+
 **Date:** 2026-10-28
 
 **Scope:** First repair pass from `PROJECT_REVIEW.md`: round progression, retry handling, scoring, and timeouts for the existing Addition-based Practice, Quiz, Test, Time, and Duel flows.

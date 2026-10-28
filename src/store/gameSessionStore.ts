@@ -12,17 +12,20 @@ export type GameMode =
   | 'addition_time'
   | 'addition_play'
   | 'addition_learn'
+  | 'addition_exam'
   | 'equations_easy';
 
 export interface QuestionState {
   n1: number;
   n2: number | '?';
-  operator: '+' | '-' | 'x' | '÷';
+  operator: '+' | '-' | 'x' | '÷' | '√';
   answer: number | '?';
   options: number[];
   correctOptionIndex: number;
   isTrueFalse?: boolean;
   missingOperand?: 'n2' | 'n1';
+  display?: { n1?: string; n2?: string; answer?: string; options?: string[] };
+  explanation?: string;
 }
 
 export interface DuelQuestionState {
@@ -130,6 +133,14 @@ export const useGameSessionStore = create<GameSessionState>((set) => ({
         || !state.currentQuestion || 'top' in state.currentQuestion) return state;
       const verdictMode = state.mode === 'addition_test' || state.mode === 'addition_time';
       if (!isCorrect) {
+        // Exam is single-attempt: a wrong choice resolves the question.
+        if (state.mode === 'addition_exam') {
+          resolved = true;
+          return {
+            questionResolved: true, hadWrongAttempt: true, redChip: state.redChip + 1,
+            questionHistory: [...state.questionHistory, { question: state.currentQuestion, userAnswer, correct: false, firstTry: true }],
+          };
+        }
         if (state.hadWrongAttempt) return state;
         return { hadWrongAttempt: true, redChip: state.redChip + (verdictMode ? 1 : 0) };
       }
