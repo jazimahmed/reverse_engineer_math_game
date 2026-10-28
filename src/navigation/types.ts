@@ -11,6 +11,7 @@ export type RootStackParamList = {
   Game: { modeId: string; topicId: string; gameTier?: number };
   Result: { modeId: string; topicId: string; score: GameScore };
   Settings: undefined;
+  Profile: undefined;
   GamesHub: undefined;
   EquationsLevels: undefined;
   EquationsBoard: { level: number };

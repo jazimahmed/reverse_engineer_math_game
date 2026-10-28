@@ -9,7 +9,16 @@
 - Fixed wrapping topic/game/level grids and review-sheet touch dismissal. Shared answer UI retains retry/duplicate-answer guards.
 - Validation: TypeScript passed; all 53 existing automated tests passed. Visual/device acceptance has not been performed.
 
-MG-2 and MG-3 are the next sequential repairs. The original core-repair record below is historical.
+### MG-2 — Working profile and settings
+
+- Added a named local profile with persisted edits and a working home shortcut.
+- Replaced the touch-dismissed settings overlay with usable appearance/vibration controls, restore preferences, confirmed progress reset, and Done/Android Back handling.
+- Removed irrelevant language switching, nonfunctional audio toggles, and empty footer actions. Correct-answer vibration now follows its preference.
+- Added in-game settings that pause/resume the same round; background/foreground changes do not resume gameplay underneath settings.
+- Added real React-rendered tests (native/storage/navigation boundaries mocked) for profile navigation, preference persistence/rehydration, reset confirmation, pause/resume, modal Back, and vibration/duplicate input. These are not device tests.
+- Validation: TypeScript passed; the focused menu tests pass. The added test-renderer dependency matches React 19.3.0.
+
+MG-3 is the next sequential repair. The original core-repair record below is historical.
 
 **Date:** 2026-10-28
 

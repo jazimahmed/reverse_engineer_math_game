@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { TopicConfig, TopicId } from '../constants/game';
 import { AppScreen, PageHeader, SurfaceCard, ui, useTheme } from '../components/ui';
+import { useSettingsStore } from '../store/settingsStore';
 
 const topics: { id: TopicId; symbol: string; description: string }[] = [
   { id: 'addition', symbol: '+', description: 'Build your number sense' },
@@ -20,11 +21,18 @@ const topics: { id: TopicId; symbol: string; description: string }[] = [
 export function MainMenuScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const colors = useTheme();
+  const name = useSettingsStore((state) => state.profileName);
   return <AppScreen>
-    <PageHeader title="Math, a little daily." subtitle="A fresh challenge for a sharper mind."
+    <PageHeader title="Math, a little daily." subtitle={`Welcome back, ${name}.`}
       action={<TouchableOpacity accessibilityRole="button" accessibilityLabel="Settings" style={[ui.iconButton, { backgroundColor: colors.surface }]} onPress={() => navigation.navigate('Settings')}>
         <Text style={{ color: colors.textPrimary, fontSize: 22 }}>⚙</Text>
       </TouchableOpacity>} />
+    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Edit profile" onPress={() => navigation.navigate('Profile')}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={[ui.iconButton, { backgroundColor: colors.backgroundAlt }]}><Text style={{ color: colors.fraction, fontWeight: '800', fontSize: 22 }}>{name.slice(0, 1).toUpperCase()}</Text></View>
+      <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>Your profile</Text>
+      <Text style={{ color: colors.textSecondary }}>Edit →</Text>
+    </TouchableOpacity>
     <SurfaceCard>
       <Text style={{ color: colors.fraction, fontWeight: '800', letterSpacing: 2, fontSize: 12 }}>YOUR DAILY BRAIN BREAK</Text>
       <Text style={[ui.title, { color: colors.textPrimary }]}>Small steps. Big progress.</Text>
