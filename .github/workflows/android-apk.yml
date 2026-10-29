@@ -26,7 +26,6 @@ jobs:
     timeout-minutes: 60
     env:
       CI: 'true'
-      NODE_ENV: production
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -43,13 +42,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
       - name: Install locked dependencies
         run: npm ci --include=dev --no-audit --no-fund
-      - name: Check TypeScript and domain tests
+      - name: Check TypeScript and gameplay tests
         run: |
           npm run typecheck
           npm test
       - name: Build release APK
         working-directory: android
         env:
+          NODE_ENV: production
           APK_ARCHITECTURES: ${{ inputs.architectures }}
         run: |
           set -o pipefail
