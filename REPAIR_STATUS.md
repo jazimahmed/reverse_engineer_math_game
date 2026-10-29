@@ -1,5 +1,12 @@
 # Core gameplay repair status
 
+## CI follow-up — React test environment
+
+- Reproduced the reported `TypeError: app.act is not a function` locally by running a rendered menu test with `NODE_ENV=production`.
+- Root cause: the Android workflow set production mode for the whole job, so React and its renderer loaded production builds without `act`. Earlier local checks did not reproduce that CI environment.
+- Scoped `NODE_ENV=production` to the release APK build step. Added a Node test preload that selects `NODE_ENV=test` before imports, including when `npm test` inherits a production environment. No tests are skipped and `act` is not mocked.
+- Verification: with inherited `CI=true` and `NODE_ENV=production`, `npm test` now passes all 75 tests (0 failures). `npm run typecheck` also passes. Verification was local on Windows with CI environment variables, not a completed GitHub Actions or device run.
+
 ## Follow-up Jira repairs (2026-10-28)
 
 ### MG-1 — Modern UI
