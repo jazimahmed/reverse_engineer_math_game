@@ -1,0 +1,157 @@
+name: OpenCode issue fix
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: opencode-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    if: >-
+      !github.event.issue.pull_request &&
+      (startsWith(github.event.comment.body, '/opencode') ||
+       startsWith(github.event.comment.body, '/oc'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+    steps:
+      - name: Read issue request
+        id: request
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const comment = context.payload.comment;
+            if (!/^\/(?:opencode|oc)(?:\s|$)/.test(comment.body)) return;
+            const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+              ...context.repo, username: comment.user.login,
+            });
+            if (!['admin', 'maintain', 'write'].includes(data.permission)) {
+              core.notice('OpenCode commands require repository write access.');
+              return;
+            }
+            core.setOutput('accepted', 'true');
+            const { data: issue } = await github.rest.issues.get({
+              ...context.repo, issue_number: context.issue.number,
+            });
+            const fs = require('node:fs');
+            const path = require('node:path');
+            fs.writeFileSync(path.join(process.env.RUNNER_TEMP, 'opencode-request.txt'), [
+              `Issue #${issue.number}: ${issue.title}`,
+              `URL: ${issue.html_url}`,
+              '\nIssue description:', issue.body || '(No description)',
+              '\nRequested work:', comment.body.replace(/^\/(?:opencode|oc)\s*/, '') || 'Fix the issue described above.',
+            ].join('\n'));
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number,
+              body: `OpenCode is working on this issue with GPT-6 Astra. [View run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).`,
+            });
+
+      - name: Check provider configuration
+        if: steps.request.outputs.accepted == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo '::error::Add OPENAI_API_KEY in repository Settings > Secrets and variables > Actions.'
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.request.outputs.accepted == 'true'
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        if: steps.request.outputs.accepted == 'true'
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install project and OpenCode CLI
+        if: steps.request.outputs.accepted == 'true'
+        run: |
+          npm ci --include=dev --no-audit --no-fund
+          npm install --global @opencode/cli
+
+      - name: Implement issue with Astra
+        if: steps.request.outputs.accepted == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          opencode run --standalone --auto --model openai/gpt-6-astra \
+            --file "$RUNNER_TEMP/opencode-request.txt" \
+            "Implement the attached GitHub issue request in this repository. Read project instructions first. Keep changes focused, preserve unrelated work, and add meaningful regression tests where needed. Run npm run typecheck and npm test and fix failures. Do not skip tests or claim device testing. Do not commit, push, create a pull request, or change git configuration: later workflow steps handle publishing. Do not modify this automation workflow or test scripts just to bypass checks. Leave only intended source, test, and documentation changes in the working tree. Summarize the changes and checks performed."
+
+      - name: Verify changes
+        if: steps.request.outputs.accepted == 'true'
+        run: |
+          npm run typecheck
+          npm test
+          git diff --check
+
+      - name: Publish pull request
+        id: publish
+        if: steps.request.outputs.accepted == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body 'OpenCode finished without file changes. Typecheck and tests passed. See the workflow log for its findings.'
+            exit 0
+          fi
+          branch="opencode/issue-${ISSUE_NUMBER}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$branch"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git diff --cached --check
+          git commit -m "Fix #${ISSUE_NUMBER} with OpenCode Astra"
+          gh auth setup-git
+          git push --set-upstream origin "$branch"
+          {
+            echo "Fixes #${ISSUE_NUMBER}"
+            echo
+            echo '## Summary'
+            echo 'Implemented by OpenCode using GPT-6 Astra from the linked issue request.'
+            echo
+            echo '## Verification'
+            echo '- npm run typecheck: passed'
+            echo '- npm test: passed'
+            echo '- git diff --check: passed'
+            echo '- No device or emulator testing was performed by this workflow.'
+            echo
+            echo "[Workflow details](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo
+            echo '## Changed files'
+            echo '```'
+            git show --stat --format= HEAD
+            echo '```'
+          } > "$RUNNER_TEMP/opencode-pr.md"
+          url=$(gh pr create --base "$BASE_BRANCH" --head "$branch" \
+            --title "Fix #${ISSUE_NUMBER}: OpenCode Astra changes" \
+            --body-file "$RUNNER_TEMP/opencode-pr.md")
+          gh issue comment "$ISSUE_NUMBER" --body "OpenCode created a pull request: $url. Automated checks passed; review before merging."
+
+      - name: Report failure
+        if: failure() && steps.request.outputs.accepted == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number,
+              body: `The OpenCode run failed. [Check the workflow log](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for the provider, test, or publishing error.`,
+            });
