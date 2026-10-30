@@ -17,7 +17,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     } },
   ]);
   return <>
-    <PageHeader title="Make it yours" subtitle="Simple settings for a comfortable session." />
+    <PageHeader title="Settings" subtitle="Choose what feels comfy for you." />
     <SurfaceCard>
       {[{ label: 'Dark appearance', description: 'A softer palette for low light.', value: night, change: setNight },
         { label: 'Answer vibration', description: 'A short vibration for correct answers.', value: haptics, change: setHaptics }].map((item) =>

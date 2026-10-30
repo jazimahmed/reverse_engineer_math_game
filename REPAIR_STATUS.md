@@ -1,5 +1,14 @@
 # Core gameplay repair status
 
+## MG-4–MG-6 follow-up (2026-10-30)
+
+### MG-4 — Colorful navigation for children
+
+- Replaced formal home copy with a greeting, a clear “Start here: Addition” action, and colorful topic cards with large math symbols, short labels, and visible play arrows.
+- Mode cards now explain the action in child-friendly language (“Missing number”, “Play with a friend”, “Beat the clock”) with a distinct picture/symbol and explicit start text. The underlying topic/mode routing is preserved.
+- Added a warmer light palette, matching dark-theme tints, chunky buttons, written Back/Settings labels, and friendlier result/profile/settings copy. Cards remain scrollable and use text and symbols as well as color.
+- Added rendered navigation coverage for every topic/mode in both themes. Native layout/child usability acceptance remains pending.
+
 ## CI follow-up — React test environment
 
 - Reproduced the reported `TypeError: app.act is not a function` locally by running a rendered menu test with `NODE_ENV=production`.
