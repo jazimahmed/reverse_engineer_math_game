@@ -38,3 +38,29 @@ test('child-friendly cards keep every topic and mode navigable in both themes', 
     await app.act(async () => tree.unmount());
   }
 });
+
+test('Equations is a disabled upcoming game and both unfinished routes are absent', async () => {
+  const app = renderApp();
+  const { GamesHubScreen } = app.load('src/screens/GamesHubScreen.tsx');
+  let tree;
+  await app.act(async () => { tree = app.renderer.create(app.React.createElement(GamesHubScreen)); });
+  const upcoming = tree.root.findAll((node) => node.type === 'TouchableOpacity' && node.props.accessibilityState?.disabled);
+  assert.equal(upcoming.length, 8);
+  for (const tile of upcoming) {
+    assert.equal(tile.props.disabled, true);
+    assert.equal(tile.props.onPress, undefined);
+  }
+  assert.ok(tap(tree, 'Equations — coming soon'));
+  assert.deepEqual(app.calls, []);
+  const back = tree.root.findAll((node) => node.type === 'TouchableOpacity' && node.findAll((child) => child.type === 'Text' && child.props.children === 'Back to number games').length)[0];
+  await app.act(async () => back.props.onPress());
+  assert.deepEqual(app.calls.at(-1), ['popTo', 'Main']);
+  const { AppNavigator } = app.load('src/navigation/AppNavigator.tsx');
+  await app.act(async () => tree.update(app.React.createElement(AppNavigator)));
+  const routes = tree.root.findAllByType('Screen').map((screen) => screen.props.name);
+  assert.ok(routes.includes('Game'));
+  assert.ok(routes.includes('GamesHub'));
+  assert.equal(routes.includes('EquationsLevels'), false);
+  assert.equal(routes.includes('EquationsBoard'), false);
+  await app.act(async () => tree.unmount());
+});

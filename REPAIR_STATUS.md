@@ -9,6 +9,13 @@
 - Added a warmer light palette, matching dark-theme tints, chunky buttons, written Back/Settings labels, and friendlier result/profile/settings copy. Cards remain scrollable and use text and symbols as well as color.
 - Added rendered navigation coverage for every topic/mode in both themes. Native layout/child usability acceptance remains pending.
 
+### MG-5 — Keep unfinished Equations inaccessible
+
+- Equations is now disabled and labeled “Coming soon”, matching all seven upcoming mini-games. Its tile has no press handler and exposes its disabled state to accessibility services.
+- Removed the Equations level/board registrations from the active navigator. Their implementation files are retained for future development, but the unfinished board is not a reachable app route.
+- The hub explains that these puzzles are not ready, has a working “Back to number games” action, and no longer presents a nonfunctional sign-in crown.
+- Added rendered checks for all eight disabled tiles, return navigation, and absence of both Equations routes.
+
 ## CI follow-up — React test environment
 
 - Reproduced the reported `TypeError: app.act is not a function` locally by running a rendered menu test with `NODE_ENV=production`.

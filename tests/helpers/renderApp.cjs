@@ -31,9 +31,13 @@ module.exports = function renderApp(clock) {
     'react-native': native,
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView', SafeAreaProvider: 'SafeAreaProvider' },
     '@react-navigation/native': {
+      NavigationContainer: 'NavigationContainer', DarkTheme: {}, DefaultTheme: {},
       useNavigation: () => navigation,
       useRoute: () => context.route,
       useFocusEffect: (effect) => React.useEffect(effect, [effect]),
+    },
+    '@react-navigation/native-stack': {
+      createNativeStackNavigator: () => ({ Navigator: 'Navigator', Screen: 'Screen' }),
     },
     '@react-native-async-storage/async-storage': {
       getItem: async (key) => storage.get(key) ?? null,
