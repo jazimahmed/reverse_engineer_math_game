@@ -16,6 +16,25 @@
 - The hub explains that these puzzles are not ready, has a working “Back to number games” action, and no longer presents a nonfunctional sign-in crown.
 - Added rendered checks for all eight disabled tiles, return navigation, and absence of both Equations routes.
 
+### MG-6 — Original math-game icon
+
+- Created an original smiling calculator mascot with mint, purple, yellow, pink, and blue colors and recognizable arithmetic buttons. The editable source is `src/assets/brand/calculator.svg`.
+- Added a 1024px Expo icon, transparent adaptive foreground, and alpha-based monochrome icon. Configured `app.json` so future Expo prebuilds use the same artwork.
+- Updated all ten existing Android standard/round launcher images across five densities. Added Android 8+ adaptive resources and Android 13+ themed-icon resources, plus a vector foreground and matching background color.
+- Updated native splash images and the React splash to match. The native window background now centers the splash bitmap rather than stretching it across the screen.
+- Added `tools/generate_app_icons.py` to reproduce 20 binary/vector resources from the SVG (Python + Pillow; no new app dependency). `--check` verifies committed output.
+
+### MG-4–MG-6 verification
+
+- `npm run typecheck`: passed.
+- `CI=true NODE_ENV=production npm test`: **77 passed, 0 failures** on the local Windows host, including rendered navigation and upcoming-game route checks.
+- `python tools/generate_app_icons.py --check`: all 20 generated resources match.
+- Icon checks: Expo file paths resolve, all three Expo images are 1024×1024, all ten Android launcher sizes match their densities, and adaptive/monochrome artwork fits Android's central 66dp safe circle.
+- Android SDK 37 `aapt2 compile --dir android/app/src/main/res`: passed for all app resources. This is resource compilation, not a complete Gradle APK build.
+- Visually inspected the generated color and monochrome artwork as images; no launcher/device screenshots were taken.
+- Android bundle export: passed with `npx expo export --platform android --max-workers 2`; 896 modules, 18 assets (including the new icon), and a production Hermes bundle emitted. The first attempt timed out during Metro startup; the two-worker retry completed.
+- Remaining acceptance: installed-APK layout/font scaling, launcher masks/themed icons, physical navigation/touch behavior, and child usability review. No emulator or physical-device testing was performed.
+
 ## CI follow-up — React test environment
 
 - Reproduced the reported `TypeError: app.act is not a function` locally by running a rendered menu test with `NODE_ENV=production`.

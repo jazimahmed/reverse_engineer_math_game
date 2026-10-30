@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <title>Smiling math calculator</title>
+  <rect x="24" y="23" width="62" height="64" rx="12" fill="#30215D"/>
+  <rect x="23" y="21" width="62" height="64" rx="12" fill="#5AE0B1"/>
+  <rect x="30" y="27" width="48" height="22" rx="7" fill="#F3FFF7"/>
+  <circle cx="44" cy="35" r="2.4" fill="#30215D"/>
+  <circle cx="64" cy="35" r="2.4" fill="#30215D"/>
+  <polyline points="47,40 50,42 54,43 58,42 61,40" fill="none" stroke="#30215D" stroke-width="2.6"/>
+  <rect x="31" y="54" width="20" height="12" rx="4" fill="#FFE38A"/>
+  <rect x="57" y="54" width="20" height="12" rx="4" fill="#FF9CC4"/>
+  <rect x="31" y="70" width="20" height="12" rx="4" fill="#B7D8FF"/>
+  <rect x="57" y="70" width="20" height="12" rx="4" fill="#E7D5FF"/>
+  <polyline points="41,57 41,63" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <polyline points="38,60 44,60" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <polyline points="64,60 70,60" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <polyline points="38,73 44,79" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <polyline points="44,73 38,79" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <circle cx="67" cy="72.5" r="1.3" fill="#30215D"/>
+  <polyline points="64,76 70,76" fill="none" stroke="#30215D" stroke-width="2.4"/>
+  <circle cx="67" cy="79.5" r="1.3" fill="#30215D"/>
+</svg>
