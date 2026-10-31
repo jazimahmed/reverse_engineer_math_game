@@ -4,49 +4,49 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { TopicConfig, TopicId } from '../constants/game';
-import { AppScreen, PageHeader, SurfaceCard, ui, useTheme } from '../components/ui';
+import { ActionButton, AppScreen, PageHeader, ui, useTheme } from '../components/ui';
 import { useSettingsStore } from '../store/settingsStore';
+import { TopicPresentation } from '../constants/topicPresentation';
 
-const topics: { id: TopicId; symbol: string; description: string }[] = [
-  { id: 'addition', symbol: '+', description: 'Build your number sense' },
-  { id: 'subtraction', symbol: '−', description: 'Find the difference' },
-  { id: 'multiplication', symbol: '×', description: 'Master your tables' },
-  { id: 'division', symbol: '÷', description: 'Share and solve' },
-  { id: 'squareRoot', symbol: '√', description: 'Discover perfect squares' },
-  { id: 'decimal', symbol: '0.1', description: 'Think beyond whole numbers' },
-  { id: 'fraction', symbol: '½', description: 'Explore parts of a whole' },
-  { id: 'games', symbol: '▦', description: 'Explore the puzzle collection' },
-];
+const topics = Object.keys(TopicPresentation) as TopicId[];
 
 export function MainMenuScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const colors = useTheme();
   const name = useSettingsStore((state) => state.profileName);
+  const night = useSettingsStore((state) => state.night);
   return <AppScreen>
-    <PageHeader title="Math, a little daily." subtitle={`Welcome back, ${name}.`}
+    <PageHeader title={`Hi, ${name}!`} subtitle="Let’s play with numbers!"
       action={<TouchableOpacity accessibilityRole="button" accessibilityLabel="Settings" style={[ui.iconButton, { backgroundColor: colors.surface }]} onPress={() => navigation.navigate('Settings')}>
         <Text style={{ color: colors.textPrimary, fontSize: 22 }}>⚙</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Settings</Text>
       </TouchableOpacity>} />
     <TouchableOpacity accessibilityRole="button" accessibilityLabel="Edit profile" onPress={() => navigation.navigate('Profile')}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
       <View style={[ui.iconButton, { backgroundColor: colors.backgroundAlt }]}><Text style={{ color: colors.fraction, fontWeight: '800', fontSize: 22 }}>{name.slice(0, 1).toUpperCase()}</Text></View>
-      <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>Your profile</Text>
-      <Text style={{ color: colors.textSecondary }}>Edit →</Text>
+      <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>My name</Text>
+      <Text style={{ color: colors.textSecondary }}>Change →</Text>
     </TouchableOpacity>
-    <SurfaceCard>
-      <Text style={{ color: colors.fraction, fontWeight: '800', letterSpacing: 2, fontSize: 12 }}>YOUR DAILY BRAIN BREAK</Text>
-      <Text style={[ui.title, { color: colors.textPrimary }]}>Small steps. Big progress.</Text>
-      <Text style={[ui.subtitle, { color: colors.textSecondary }]}>Pick a topic, find your rhythm, and learn at your own pace.</Text>
-    </SurfaceCard>
-    <Text style={[ui.sectionTitle, { color: colors.textPrimary }]}>What will you explore?</Text>
+    <View style={[ui.card, { backgroundColor: colors.backgroundAlt, borderColor: colors.border }]}>
+      <Text accessible={false} style={{ fontSize: 32 }}>🌟 + 🌟 = ?</Text>
+      <Text style={[ui.title, { color: colors.textPrimary }]}>Ready, set, add!</Text>
+      <Text style={[ui.subtitle, { color: colors.textSecondary }]}>New here? Start with adding. You can learn first or jump into a game.</Text>
+      <ActionButton label="Start here: Addition →" onPress={() => navigation.navigate('TopicSelect', { topicId: 'addition' })} />
+    </View>
+    <Text style={[ui.sectionTitle, { color: colors.textPrimary }]}>Pick a game 👇</Text>
     <View style={ui.grid}>
-      {topics.map(({ id, symbol, description }) => <TouchableOpacity key={id} accessibilityRole="button" accessibilityLabel={TopicConfig[id].title}
+      {topics.map((id) => {
+        const { label, symbol, description, light, dark } = TopicPresentation[id];
+        return <TouchableOpacity key={id} accessibilityRole="button" accessibilityLabel={TopicConfig[id].title}
+        accessibilityHint={id === 'games' ? 'See upcoming games' : `Choose how to play ${TopicConfig[id].title}`}
         onPress={() => id === 'games' ? navigation.navigate('GamesHub') : navigation.navigate('TopicSelect', { topicId: id })}
-        style={[ui.tile, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={{ fontSize: 32, fontWeight: '700', color: colors[id] }}>{symbol}</Text>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.textPrimary }}>{TopicConfig[id].title}</Text>
-        <Text style={{ fontSize: 12, lineHeight: 18, color: colors.textSecondary }}>{description}</Text>
-      </TouchableOpacity>)}
+        style={[ui.tile, { backgroundColor: night ? dark : light, borderColor: colors[id] }]}>
+        <Text accessible={false} style={{ fontSize: 38, fontWeight: '800', color: colors[id] }}>{symbol}</Text>
+        <Text style={{ fontSize: 20, fontWeight: '800', color: colors.textPrimary }}>{label}</Text>
+        <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textSecondary }}>{description}</Text>
+        <Text style={{ fontSize: 14, fontWeight: '800', color: colors[id], marginTop: 'auto' }}>{id === 'games' ? 'Take a look →' : 'Let’s play →'}</Text>
+      </TouchableOpacity>;
+      })}
     </View>
   </AppScreen>;
 }

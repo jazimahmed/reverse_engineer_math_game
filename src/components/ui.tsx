@@ -22,7 +22,7 @@ export function PageHeader({ title, subtitle, onBack, action }: {
   const colors = useTheme();
   return <View style={ui.header}>
     {onBack && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Go back" onPress={onBack} style={[ui.iconButton, { backgroundColor: colors.surface }]}>
-      <Text style={{ color: colors.textPrimary, fontSize: 24 }}>‹</Text>
+      <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '700' }}>‹ Back</Text>
     </TouchableOpacity>}
     <View style={{ flex: 1 }}>
       <Text accessibilityRole="header" style={[ui.title, { color: colors.textPrimary }]}>{title}</Text>
@@ -37,7 +37,7 @@ export function ActionButton({ label, onPress, secondary = false, disabled = fal
 }) {
   const colors = useTheme();
   return <TouchableOpacity accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
-    style={[ui.button, { backgroundColor: secondary ? colors.surfaceDark : colors.restartBtn, opacity: disabled ? 0.45 : 1 }]}>
+    style={[ui.button, { backgroundColor: secondary ? colors.surfaceDark : colors.restartBtn, borderBottomColor: secondary ? colors.border : '#403080', opacity: disabled ? 0.45 : 1 }]}>
     <Text style={[ui.buttonText, { color: secondary ? colors.textPrimary : '#FFFFFF' }]}>{label}</Text>
   </TouchableOpacity>;
 }
@@ -50,13 +50,13 @@ export function SurfaceCard({ children }: PropsWithChildren) {
 export const ui = StyleSheet.create({
   page: { flexGrow: 1, width: '100%', maxWidth: 720, alignSelf: 'center', padding: 20, gap: 20, paddingBottom: 32 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
-  title: { fontSize: 28, fontWeight: '800', letterSpacing: -0.7 },
-  subtitle: { fontSize: 14, lineHeight: 21, marginTop: 5 },
+  title: { fontSize: 28, fontWeight: '800', letterSpacing: -0.3 },
+  subtitle: { fontSize: 15, lineHeight: 23, marginTop: 5 },
   iconButton: { minWidth: 48, minHeight: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', padding: 10 },
-  button: { minHeight: 52, borderRadius: 16, paddingHorizontal: 18, paddingVertical: 14, justifyContent: 'center', alignItems: 'center' },
-  buttonText: { fontSize: 16, fontWeight: '700' },
+  button: { minHeight: 56, borderRadius: 20, borderBottomWidth: 4, paddingHorizontal: 18, paddingVertical: 14, justifyContent: 'center', alignItems: 'center' },
+  buttonText: { fontSize: 17, fontWeight: '800', textAlign: 'center' },
   card: { borderRadius: 24, padding: 22, gap: 12, borderWidth: 1 },
   sectionTitle: { fontSize: 19, fontWeight: '700' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
-  tile: { width: '48%', minHeight: 146, padding: 18, borderRadius: 22, gap: 10, borderWidth: 1 },
+  tile: { width: '48%', minHeight: 166, padding: 16, borderRadius: 24, gap: 10, borderWidth: 1, borderBottomWidth: 4 },
 });

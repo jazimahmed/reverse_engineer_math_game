@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
@@ -13,7 +13,7 @@ export function SplashScreen() {
     return () => clearTimeout(timer);
   }, [navigation]);
   return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, backgroundColor: colors.background }}>
-    <Text style={{ fontSize: 64, color: colors.fraction, fontWeight: '800' }}>m.</Text>
-    <Text style={{ color: colors.textPrimary, fontSize: 26, fontWeight: '700' }}>A little math. Every day.</Text>
+    <Image source={require('../assets/brand/icon.png')} accessibilityLabel="Smiling math calculator" style={{ width: 144, height: 144, borderRadius: 32 }} />
+    <Text style={{ color: colors.textPrimary, fontSize: 26, fontWeight: '800', textAlign: 'center' }}>Let’s play with numbers!</Text>
   </View>;
 }

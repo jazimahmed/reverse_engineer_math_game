@@ -12,17 +12,17 @@ export function ResultScreen() {
   const [review, setReview] = useState(false);
   const duel = modeId === 'duel';
   return <AppScreen>
-    <PageHeader title="Round complete" subtitle="Every question is a step forward." />
+    <PageHeader title="You did it! 🎉" subtitle={`You finished all ${score.totalQuestions} questions!`} />
     <SurfaceCard>
       <Text style={{ color: colors.fraction, fontSize: 44, fontWeight: '800', textAlign: 'center' }}>✓</Text>
-      <Text style={[ui.title, { color: colors.textPrimary, textAlign: 'center' }]}>Nice work showing up.</Text>
+      <Text style={[ui.title, { color: colors.textPrimary, textAlign: 'center' }]}>Great trying, great learning!</Text>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 20 }}>
         {[{ label: duel ? 'Bottom player' : modeId === 'learn' ? 'Learned' : 'First try', value: duel ? score.duelChipBottom : score.greenChip },
           { label: duel ? 'Top player' : 'Retry / missed', value: duel ? score.duelChipTop : score.redChip }].map(({ label, value }) =>
           <View key={label} style={{ alignItems: 'center', gap: 8 }}><Text style={{ fontSize: 38, fontWeight: '800', color: colors.textPrimary }}>{value}</Text><Text style={{ color: colors.textSecondary }}>{label}</Text></View>)}
       </View>
-      <ActionButton label="Play another round" onPress={() => navigation.replace('Game', { modeId, topicId })} />
-      <ActionButton label="Choose a mode" secondary onPress={() => navigation.popTo('TopicSelect', { topicId })} />
+      <ActionButton label="Play again ▶" onPress={() => navigation.replace('Game', { modeId, topicId })} />
+      <ActionButton label="Pick another game" secondary onPress={() => navigation.popTo('TopicSelect', { topicId })} />
     </SurfaceCard>
     <ActionButton label="Review your answers" secondary onPress={() => setReview(true)} />
     <Modal visible={review} animationType="slide" transparent onRequestClose={() => setReview(false)}>

@@ -14,8 +14,6 @@ import { ResultScreen } from '../screens/ResultScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { GamesHubScreen } from '../screens/GamesHubScreen';
-import { EquationsLevelsScreen } from '../screens/EquationsLevelsScreen';
-import { EquationsBoardScreen } from '../screens/EquationsBoardScreen';
 import { useSettingsStore } from '../store';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,8 +39,7 @@ export function AppNavigator() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="GamesHub" component={GamesHubScreen} />
-        <Stack.Screen name="EquationsLevels" component={EquationsLevelsScreen} />
-        <Stack.Screen name="EquationsBoard" component={EquationsBoardScreen} />
+        {/* Equations stays unregistered until its gameplay is complete (MG-5). */}
         {/* Mini-games - placeholders */}
         <Stack.Screen name="Game2048" component={() => null} />
         <Stack.Screen name="GameFifteen" component={() => null} />

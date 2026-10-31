@@ -17,7 +17,7 @@ module.exports = function renderApp(clock) {
   const navigation = Object.fromEntries(['navigate', 'replace', 'popTo', 'goBack'].map((action) => [action, (...args) => calls.push([action, ...args])]));
   const context = { route: { params: { modeId: 'practice', topicId: 'addition' } } };
   const native = {
-    View: 'View', Text: 'Text', TouchableOpacity: 'TouchableOpacity', Pressable: 'Pressable',
+    View: 'View', Text: 'Text', Image: 'Image', TouchableOpacity: 'TouchableOpacity', Pressable: 'Pressable',
     ScrollView: 'ScrollView', TextInput: 'TextInput', Switch: 'Switch', SafeAreaView: 'SafeAreaView',
     Modal: ({ visible, children }) => visible ? React.createElement('Modal', null, children) : null,
     StyleSheet: { create: (styles) => styles },
@@ -31,9 +31,13 @@ module.exports = function renderApp(clock) {
     'react-native': native,
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView', SafeAreaProvider: 'SafeAreaProvider' },
     '@react-navigation/native': {
+      NavigationContainer: 'NavigationContainer', DarkTheme: {}, DefaultTheme: {},
       useNavigation: () => navigation,
       useRoute: () => context.route,
       useFocusEffect: (effect) => React.useEffect(effect, [effect]),
+    },
+    '@react-navigation/native-stack': {
+      createNativeStackNavigator: () => ({ Navigator: 'Navigator', Screen: 'Screen' }),
     },
     '@react-native-async-storage/async-storage': {
       getItem: async (key) => storage.get(key) ?? null,
@@ -52,6 +56,7 @@ module.exports = function renderApp(clock) {
       const alias = /^@(store|constants|components|screens|navigation|utils)\/(.*)$/.exec(id);
       const base = alias ? path.join(process.cwd(), 'src', alias[1], alias[2]) : id.startsWith('.') ? path.resolve(path.dirname(filename), id) : null;
       if (base) {
+        if (/\.(png|webp)$/.test(base)) return { uri: base };
         if (base.endsWith('.json')) return nativeRequire(base);
         const resolved = [base, `${base}.ts`, `${base}.tsx`, path.join(base, 'index.ts')].find((file) => fs.existsSync(file) && fs.statSync(file).isFile());
         if (resolved) return load(resolved);

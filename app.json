@@ -3,8 +3,14 @@
     "name": "Math Games Research Build",
     "slug": "math-games-research-build",
     "version": "0.1.0",
+    "icon": "./src/assets/brand/icon.png",
     "android": {
-      "package": "org.independent.mathgames.research"
+      "package": "org.independent.mathgames.research",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/brand/adaptive-icon.png",
+        "backgroundColor": "#6543C3",
+        "monochromeImage": "./src/assets/brand/monochrome-icon.png"
+      }
     }
   }
 }

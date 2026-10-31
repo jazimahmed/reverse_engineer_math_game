@@ -11,7 +11,7 @@ export function ProfileScreen() {
   const [name, setName] = useState(profileName);
   const save = () => { setProfileName(name); navigation.goBack(); };
   return <AppScreen>
-    <PageHeader title="Your space" subtitle="A little personalization goes a long way." onBack={() => navigation.goBack()} />
+    <PageHeader title="My name" subtitle="Let’s make this your game!" onBack={() => navigation.goBack()} />
     <SurfaceCard>
       <Text style={{ color: colors.fraction, fontSize: 44, fontWeight: '800' }}>{(name.trim() || 'L').slice(0, 1).toUpperCase()}</Text>
       <Text style={{ color: colors.textPrimary, fontSize: 18, fontWeight: '700' }}>What should we call you?</Text>
