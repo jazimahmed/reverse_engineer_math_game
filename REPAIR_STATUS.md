@@ -1,5 +1,16 @@
 # Core gameplay repair status
 
+## Colorful, icon-led UI follow-up (2026-11-07)
+
+- Two parallel agents handled non-overlapping areas: home/topic/upcoming-game screens and gameplay/result screens. The lead created the shared vector artwork and palette, integrated both changes, and reviewed the result.
+- Added 31 original, scalable illustrations for math topics, game modes, rewards, and common actions. These use the existing `react-native-svg` dependency; no new dependency or remote asset is required.
+- Replaced text-heavy topic/mode cards with a large illustration and short visible label. Full descriptions remain available as accessibility hints. Home has a shorter illustrated welcome card and a clear Addition entry point.
+- Added saturated purple, sky-blue, green, orange, pink, and yellow card fills with dark-theme companions. Updated answer tiles, keypad rows, score/timer chips, buttons, book/explanation panels, and trophy-style results.
+- Kept routing, math generation, scoring, timers, retries, and disabled upcoming games intact. Correct/wrong feedback still uses symbols and words, not color alone. Decorative illustrations do not intercept touches and are hidden from screen readers.
+- `npm run typecheck`: passed. `CI=true NODE_ENV=production npm test`: **77 passed, 0 failed** locally, including all 45 arithmetic journeys and topic/mode navigation in both themes.
+- Reviewed an exported illustration gallery in a desktop browser (artwork review, not an app/device screenshot). Calculated minimum card-label contrast across the six light/dark palettes: **8.28:1**.
+- Native device/layout acceptance is pending. No APK installation or device testing was performed for this follow-up.
+
 ## MG-4–MG-6 follow-up (2026-10-30)
 
 ### MG-4 — Colorful navigation for children

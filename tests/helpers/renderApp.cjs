@@ -28,6 +28,11 @@ module.exports = function renderApp(clock) {
     } },
   };
   const mocks = {
+    'react-native-svg': {
+      __esModule: true, default: 'Svg',
+      Circle: 'SvgCircle', Ellipse: 'SvgEllipse', G: 'SvgG', Line: 'SvgLine', Path: 'SvgPath',
+      Polygon: 'SvgPolygon', Rect: 'SvgRect', Text: 'SvgText',
+    },
     'react-native': native,
     'react-native-safe-area-context': { SafeAreaView: 'SafeAreaView', SafeAreaProvider: 'SafeAreaProvider' },
     '@react-navigation/native': {

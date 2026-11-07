@@ -5,8 +5,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { TopicConfig, TopicId } from '../constants/game';
 import { AppScreen, PageHeader, ui, useTheme } from '../components/ui';
-import { ModePresentation, TopicPresentation } from '../constants/topicPresentation';
+import { ModePresentation } from '../constants/topicPresentation';
 import { useSettingsStore } from '../store/settingsStore';
+import { PlayfulIcon } from '../components/PlayfulIcon';
+import { PlayfulPalettes } from '../constants/playful';
 
 export function TopicSelectScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -15,19 +17,17 @@ export function TopicSelectScreen() {
   const night = useSettingsStore((state) => state.night);
   const config = TopicConfig[topicId as TopicId];
   return <AppScreen>
-    <PageHeader title={config?.title || 'Pick a game'} subtitle="How do you want to play? Tap a card!" onBack={() => navigation.goBack()} />
+    <PageHeader title={config?.title || 'Pick a game'} subtitle="Choose your challenge" onBack={() => navigation.goBack()} />
     <View style={ui.grid}>
       {config?.modes.map((modeId, index) => {
         const mode = ModePresentation[modeId];
-        const tint = Object.values(TopicPresentation)[index % 7];
+        const tint = PlayfulPalettes[index % PlayfulPalettes.length];
         return <TouchableOpacity key={modeId} accessibilityRole="button"
         accessibilityLabel={mode.label} accessibilityHint={mode.description}
         onPress={() => navigation.navigate('Game', { modeId, topicId })}
-        style={[ui.tile, { backgroundColor: night ? tint.dark : tint.light, borderColor: colors.border }]}>
-        <Text accessible={false} style={{ fontSize: 30, fontWeight: '800', color: colors.fraction }}>{mode.symbol}</Text>
-        <Text style={{ fontSize: 19, fontWeight: '800', color: colors.textPrimary }}>{mode.label}</Text>
-        <Text style={{ fontSize: 14, lineHeight: 21, color: colors.textSecondary }}>{mode.description}</Text>
-        <Text style={{ color: colors.fraction, fontWeight: '800', marginTop: 'auto' }}>{modeId === 'learn' ? 'Start learning →' : 'Start game →'}</Text>
+        style={[ui.tile, { backgroundColor: night ? tint.darkFill : tint.fill, borderColor: tint.edge, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 }]}>
+        <PlayfulIcon name={mode.icon} size={80} />
+        <Text style={{ fontSize: 19, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>{mode.shortLabel}</Text>
       </TouchableOpacity>;
       })}
     </View>

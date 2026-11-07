@@ -3,8 +3,10 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { AnswerViewProps } from './AnswerView';
 import { ActionButton, ui } from './ui';
 import { formatQuestion, isAnswerCorrect, parseAnswer } from '../utils/questionGenerator';
+import { PlayfulIcon } from './PlayfulIcon';
+import { PlayfulPalettes } from '../constants/playful';
 
-export function PlayView({ currentQuestion: q, questionIndex, totalQuestions, onAnswer, colors, disabled = false }: AnswerViewProps) {
+export function PlayView({ currentQuestion: q, questionIndex, totalQuestions, onAnswer, colors, night, disabled = false }: AnswerViewProps) {
   const [input, setInput] = useState('');
   const [message, setMessage] = useState('Enter your answer below.');
   const resolved = useRef(false);
@@ -21,27 +23,34 @@ export function PlayView({ currentQuestion: q, questionIndex, totalQuestions, on
     const firstTry = !retried.current;
     if (correct) resolved.current = true;
     else retried.current = true;
-    setMessage(correct ? 'That’s it. Well done!' : 'Not quite. Edit your answer and try again.');
+    setMessage(correct ? '✓ Well done!' : '✕ Edit your answer and try again.');
     onAnswer(parseAnswer(input)!, correct, firstTry);
   };
   return <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={ui.page}>
-    <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>PLAY · {questionIndex} / {totalQuestions}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <PlayfulIcon name="play" size={48} />
+      <Text style={{ color: colors.textSecondary, fontWeight: '800' }}>{questionIndex} / {totalQuestions}</Text>
+    </View>
+    <View style={{ height: 10, borderRadius: 6, backgroundColor: colors.surfaceDark, overflow: 'hidden' }}>
+      <View style={{ height: 10, borderRadius: 6, width: `${questionIndex / totalQuestions * 100}%`, backgroundColor: colors.decimal }} />
+    </View>
     <View style={[ui.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text adjustsFontSizeToFit numberOfLines={2} style={{ color: colors.textPrimary, fontSize: 34, fontWeight: '800', textAlign: 'center' }}>{formatQuestion(q, true)}</Text>
       <TextInput accessibilityLabel="Your answer" value={input} editable={!locked} maxLength={24} showSoftInputOnFocus={false}
         onChangeText={(text) => setInput(text.replace(/[^\d./-]/g, '').slice(0, 24))} onSubmitEditing={submit}
         placeholder="?" placeholderTextColor={colors.textSecondary}
-        style={{ borderWidth: 1, borderColor: colors.border, color: colors.textPrimary, padding: 16, borderRadius: 16, fontSize: 28, textAlign: 'center' }} />
+        style={{ borderWidth: 2, borderColor: colors.fraction, backgroundColor: colors.backgroundAlt, color: colors.textPrimary, padding: 16, borderRadius: 16, fontSize: 28, fontWeight: '700', textAlign: 'center' }} />
       <Text accessibilityLiveRegion="polite" style={{ color: colors.textSecondary, textAlign: 'center' }}>{message}</Text>
     </View>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 }}>
-      {['7', '8', '9', '⌫', '4', '5', '6', 'Clear', '1', '2', '3', '/', '−', '0', '.'].map((key) =>
-        <TouchableOpacity key={key} accessibilityRole="button" accessibilityLabel={key === '⌫' ? 'Backspace' : key} disabled={locked}
+      {['7', '8', '9', '⌫', '4', '5', '6', 'Clear', '1', '2', '3', '/', '−', '0', '.'].map((key, index) => {
+        const palette = PlayfulPalettes[Math.floor(index / 4) % PlayfulPalettes.length];
+        return <TouchableOpacity key={key} accessibilityRole="button" accessibilityLabel={key === '⌫' ? 'Backspace' : key} disabled={locked} accessibilityState={{ disabled: locked }}
           onPress={() => setInput((value) => key === '⌫' ? value.slice(0, -1) : key === 'Clear' ? '' : (value + (key === '−' ? '-' : key)).slice(0, 24))}
-          style={{ width: '23%', minHeight: 58, borderRadius: 16, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: colors.textPrimary, fontSize: key === 'Clear' ? 15 : 24, fontWeight: '600' }}>{key}</Text>
-        </TouchableOpacity>)}
+          style={{ width: '23%', minHeight: 60, paddingVertical: 12, borderRadius: 16, borderBottomWidth: 4, borderColor: night ? palette.accent : palette.edge, backgroundColor: night ? palette.darkFill : palette.fill, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: night ? colors.textPrimary : palette.ink, fontSize: key === 'Clear' ? 15 : 24, fontWeight: '800' }}>{key}</Text>
+        </TouchableOpacity>; })}
     </View>
-    <ActionButton label="Check answer" disabled={locked} onPress={submit} />
+    <ActionButton label="Check answer" icon="check" disabled={locked} onPress={submit} />
   </ScrollView>;
 }
