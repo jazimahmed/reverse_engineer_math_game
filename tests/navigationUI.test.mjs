@@ -18,17 +18,26 @@ test('child-friendly cards keep every topic and mode navigable in both themes', 
       tree = app.renderer.create(app.React.createElement(MainMenuScreen));
     });
     for (const [topicId, config] of Object.entries(TopicConfig)) {
+      assert.ok(tap(tree, config.title).props.accessibilityHint);
       await app.act(async () => tap(tree, config.title).props.onPress());
       assert.deepEqual(app.calls.at(-1), topicId === 'games' ? ['navigate', 'GamesHub'] : ['navigate', 'TopicSelect', { topicId }]);
     }
     const start = tree.root.findAll((node) => node.type === 'TouchableOpacity' && node.findAll((child) => child.type === 'Text' && child.props.children === 'Start here: Addition →').length)[0];
     await app.act(async () => start.props.onPress());
     assert.deepEqual(app.calls.at(-1), ['navigate', 'TopicSelect', { topicId: 'addition' }]);
+    for (const [label, route] of [['Settings', 'Settings'], ['Edit profile', 'Profile']]) {
+      await app.act(async () => tap(tree, label).props.onPress());
+      assert.deepEqual(app.calls.at(-1), ['navigate', route]);
+    }
     for (const [topicId, config] of Object.entries(TopicConfig)) {
       if (topicId === 'games') continue;
       app.context.route.params = { topicId };
       await app.act(async () => tree.update(app.React.createElement(TopicSelectScreen)));
       for (const modeId of config.modes) {
+        const card = tap(tree, ModePresentation[modeId].label);
+        assert.equal(card.props.accessibilityHint, ModePresentation[modeId].description);
+        assert.ok(card.findAll((node) => node.type === 'Text' && node.props.children === ModePresentation[modeId].shortLabel).length,
+          `${modeId} has a readable short label`);
         await app.act(async () => tap(tree, ModePresentation[modeId].label).props.onPress());
         assert.deepEqual(app.calls.at(-1), ['navigate', 'Game', { modeId, topicId }]);
       }

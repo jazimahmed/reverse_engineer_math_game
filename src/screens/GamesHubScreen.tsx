@@ -3,33 +3,39 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { ActionButton, AppScreen, PageHeader, SurfaceCard, ui, useTheme } from '../components/ui';
+import { ActionButton, AppScreen, PageHeader, ui, useTheme } from '../components/ui';
+import { PlayfulIcon } from '../components/PlayfulIcon';
+import { PlayfulPalettes } from '../constants/playful';
+import { useSettingsStore } from '../store/settingsStore';
 
 const games = [
-  { label: '2048', icon: '2048' }, { label: 'Fifteen', icon: '15' },
-  { label: 'Puzzle', icon: '🧩' }, { label: 'Match', icon: '🃏' },
-  { label: 'Sudoku', icon: '▦' }, { label: 'Mix', icon: '🎲' },
-  { label: 'Memory', icon: '🧠' }, { label: 'Equations', icon: '=?' },
-];
+  { label: '2048', icon: '2048' }, { label: 'Fifteen', icon: 'fifteen' },
+  { label: 'Puzzle', icon: 'puzzle' }, { label: 'Match', icon: 'memory' },
+  { label: 'Sudoku', icon: 'sudoku' }, { label: 'Mix', icon: 'mix' },
+  { label: 'Memory', icon: 'memory' }, { label: 'Equations', icon: 'quiz' },
+] as const;
 
 export function GamesHubScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const colors = useTheme();
+  const night = useSettingsStore((state) => state.night);
   return <AppScreen>
-    <PageHeader title="More games" subtitle="New puzzles are on the way!" onBack={() => navigation.goBack()} />
-    <SurfaceCard>
-      <Text style={{ color: colors.textPrimary, fontWeight: '800', fontSize: 22 }}>Coming soon 🌱</Text>
-      <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 23 }}>These puzzles aren’t ready to play yet. You can play our number games now!</Text>
-      <ActionButton label="Back to number games" onPress={() => navigation.popTo('Main')} />
-    </SurfaceCard>
+    <PageHeader title="More games" subtitle="Coming soon!" onBack={() => navigation.goBack()} />
+    <ActionButton label="Back to number games" icon="back" onPress={() => navigation.popTo('Main')} />
     <View style={ui.grid}>
-      {games.map(({ label, icon }) => <TouchableOpacity key={label} disabled
+      {games.map(({ label, icon }, index) => {
+        const tint = PlayfulPalettes[index % PlayfulPalettes.length];
+        return <TouchableOpacity key={label} disabled
         accessibilityRole="button" accessibilityLabel={`${label} — coming soon`} accessibilityState={{ disabled: true }}
-        style={[ui.tile, { backgroundColor: colors.surfaceDark, borderColor: colors.border }]}>
-        <Text accessible={false} style={{ fontSize: 30, fontWeight: '800', color: colors.fraction }}>{icon}</Text>
-        <Text style={{ fontSize: 19, fontWeight: '700', color: colors.textPrimary }}>{label}</Text>
-        <Text style={{ fontSize: 14, color: colors.textSecondary }}>Coming soon</Text>
-      </TouchableOpacity>)}
+        accessibilityHint="This game is not ready to play yet"
+        style={[ui.tile, { backgroundColor: night ? tint.darkFill : tint.fill, borderColor: tint.edge, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 }]}>
+        <PlayfulIcon name={icon} size={72} />
+        <Text style={{ fontSize: 19, fontWeight: '800', color: colors.textPrimary, textAlign: 'center' }}>{label}</Text>
+        <View style={{ borderRadius: 12, backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 4 }}>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.textPrimary }}>Soon</Text>
+        </View>
+      </TouchableOpacity>;
+      })}
     </View>
   </AppScreen>;
 }
